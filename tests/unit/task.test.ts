@@ -4,6 +4,7 @@ import {
   createTask,
   markTaskDeleted,
   normalizeLabels,
+  orderAtIndex,
   orderAtTopOf,
   type Task,
 } from "@/lib/domain/task";
@@ -91,5 +92,20 @@ describe("orderAtTopOf", () => {
     const key = orderAtTopOf([todo, backlog], "todo");
     expect(key < "a5").toBe(true);
     expect(orderAtTopOf([], "todo")).toBe("a0");
+  });
+});
+
+describe("orderAtIndex", () => {
+  const column = ["a0", "a1", "a2"].map((order) => ({ ...makeTask(), order }));
+
+  it("produces a key that sorts into the requested slot", () => {
+    expect(orderAtIndex(column, 0) < "a0").toBe(true);
+    const middle = orderAtIndex(column, 1);
+    expect("a0" < middle && middle < "a1").toBe(true);
+    expect(orderAtIndex(column, 3) > "a2").toBe(true);
+  });
+
+  it("handles an empty column", () => {
+    expect(orderAtIndex([], 0)).toBe("a0");
   });
 });

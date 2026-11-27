@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { compareOrder, generateKeyBetween, isValidOrderKey } from "@/lib/domain/ordering";
+import {
+  compareOrder,
+  generateKeyBetween,
+  isValidOrderKey,
+  keyBetweenNeighbours,
+} from "@/lib/domain/ordering";
 
 describe("generateKeyBetween", () => {
   it("starts from a0 and steps the integer part at the ends", () => {
@@ -74,6 +79,18 @@ describe("isValidOrderKey", () => {
     expect(isValidOrderKey("a")).toBe(false);
     expect(isValidOrderKey("a00")).toBe(false);
     expect(isValidOrderKey("a0!")).toBe(false);
+  });
+});
+
+describe("keyBetweenNeighbours", () => {
+  it("behaves like generateKeyBetween for well-ordered neighbours", () => {
+    expect(keyBetweenNeighbours("a0", "a1")).toBe(generateKeyBetween("a0", "a1"));
+    expect(keyBetweenNeighbours(null, "a0")).toBe(generateKeyBetween(null, "a0"));
+  });
+
+  it("does not throw when two neighbours share a key, placing the item after them", () => {
+    const key = keyBetweenNeighbours("a1", "a1");
+    expect(key > "a1").toBe(true);
   });
 });
 
