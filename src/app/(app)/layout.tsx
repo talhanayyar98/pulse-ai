@@ -3,6 +3,7 @@ import { CommandPalette } from "@/components/command/CommandPalette";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { GlobalShortcuts } from "@/components/shell/GlobalShortcuts";
 import { MobileTopBar } from "@/components/shell/MobileTopBar";
+import { AppBadgeSync } from "@/components/shell/OverdueBadge";
 import { NewTaskFab } from "@/components/shell/QuickActions";
 import { SessionGuard } from "@/components/shell/SessionGuard";
 import { Sidebar } from "@/components/shell/Sidebar";
@@ -31,6 +32,7 @@ export default function AppLayout({ children }: Readonly<{ children: ReactNode }
         <NewTaskFab />
       </div>
       <SessionGuard />
+      <AppBadgeSync />
       <GlobalShortcuts />
       <CommandPalette />
       <TaskDrawer />

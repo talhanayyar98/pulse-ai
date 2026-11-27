@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { compareOrder, generateKeyBetween, isValidOrderKey } from "./ordering";
+import { compareOrder, isValidOrderKey, keyBetweenNeighbours } from "./ordering";
 import { TASK_STATUSES, type TaskStatus } from "./task-status";
 
 export const PRIORITIES = ["low", "medium", "high", "urgent"] as const;
@@ -154,8 +154,17 @@ export function tasksInColumn(tasks: readonly Task[], status: TaskStatus): Task[
   return tasks.filter((task) => task.status === status && !task.deletedAt).sort(compareOrder);
 }
 
+/**
+ * Order key for dropping a task at `index` in a column, where `columnTasks` is the column in
+ * display order *without* the task being moved.
+ */
+export function orderAtIndex(columnTasks: readonly Task[], index: number): string {
+  const before = columnTasks[index - 1];
+  const after = columnTasks[index];
+  return keyBetweenNeighbours(before?.order ?? null, after?.order ?? null);
+}
+
 /** Order key that places a task above everything currently in the column. */
 export function orderAtTopOf(tasks: readonly Task[], status: TaskStatus): string {
-  const first = tasksInColumn(tasks, status)[0];
-  return generateKeyBetween(null, first?.order ?? null);
+  return orderAtIndex(tasksInColumn(tasks, status), 0);
 }

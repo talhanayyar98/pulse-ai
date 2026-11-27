@@ -1,15 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion, useIsPresent, type HTMLMotionProps } from "motion/react";
-import {
-  type KeyboardEvent,
-  type ReactNode,
-  useLayoutEffect,
-  useRef,
-  useSyncExternalStore,
-} from "react";
+import { type KeyboardEvent, type ReactNode, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
+import { useIsClient } from "@/lib/hooks/use-is-client";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -59,8 +54,6 @@ interface OverlayProps {
   children: ReactNode;
 }
 
-const noopSubscribe = () => () => {};
-
 export function Overlay({
   open,
   onClose,
@@ -70,11 +63,7 @@ export function Overlay({
   initialFocus = "first",
   children,
 }: OverlayProps) {
-  const isClient = useSyncExternalStore(
-    noopSubscribe,
-    () => true,
-    () => false,
-  );
+  const isClient = useIsClient();
   if (!isClient) return null;
   return createPortal(
     <AnimatePresence>

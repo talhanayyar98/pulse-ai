@@ -153,6 +153,18 @@ export function generateKeyBetween(before: string | null, after: string | null):
   return a.integer + midpoint(a.fraction, null);
 }
 
+/**
+ * Key for the slot between two neighbours in a list. Unlike generateKeyBetween it tolerates
+ * neighbours with equal keys (two devices can insert at the same spot offline): the item then
+ * goes right after `before`, which keeps the list consistently sorted.
+ */
+export function keyBetweenNeighbours(before: string | null, after: string | null): string {
+  if (before !== null && after !== null && before >= after) {
+    return generateKeyBetween(before, null);
+  }
+  return generateKeyBetween(before, after);
+}
+
 /** Byte-order comparison matching MongoDB's default string sort, tie-broken by id. */
 export function compareOrder(
   a: { order: string; id: string },

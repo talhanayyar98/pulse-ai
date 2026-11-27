@@ -65,11 +65,28 @@ Every variable is listed and explained in [`.env.example`](.env.example).
 
 Integration and e2e tests need MongoDB running. First Playwright run on a new machine: `npx playwright install chromium`.
 
+## Using the board
+
+| Action                     | Mouse / trackpad    | Touch                 | Keyboard                                                          |
+| -------------------------- | ------------------- | --------------------- | ----------------------------------------------------------------- |
+| New task                   | **New task** button | Neon **+** button     | `N`                                                               |
+| Search tasks, switch views | **Search** button   | Search icon           | `⌘K` / `Ctrl+K`                                                   |
+| Open a task                | Click the card      | Tap the card          | `Tab` to the card, `Enter`                                        |
+| Move or reorder a task     | Drag the card       | Long-press, then drag | `Space` to lift, arrows to move, `Space` to drop, `Esc` to cancel |
+| Close the palette / drawer | Click outside       | Tap outside           | `Esc`                                                             |
+
+In quick add, `#label` adds a label and `!low` / `!med` / `!high` / `!urgent` sets the priority, e.g. `Pay rent #home !urgent`.
+
+- **Filters** (above the board): All / This week / This month, plus priority and label chips. "This week" means planned for this week _or_ due this week; "This month" includes everything in this week. Overdue tasks always show. Filters are remembered on each device.
+- **Done** shows the last 7 days; older completed tasks fold into a toggle at the bottom of the column.
+- **Overdue** cards get a pulsing neon edge, and the count appears next to the Board title, on the Board nav item and, when the app is installed, on its Dock icon. Tasks due within 24 hours show their date in neon.
+
 ## How data flows
 
 - **Reads:** `GET /api/tasks` returns the signed-in user's tasks. View pages are static shells, so the data always loads in the browser (this is what lets the app shell work offline).
 - **Writes:** every change sends the full task to `POST /api/sync`. The server keeps whichever version has the newer `updatedAt` (last-write-wins), so replaying a write is harmless. Deletes are soft (`deletedAt`), so other devices learn about them.
 - **Optimistic UI:** the screen shows server data plus your unsaved edits (`src/lib/client/pending.ts`), so changes appear instantly and fast successive edits never overwrite each other.
+- **Ordering:** each task has a fractional order key (`src/lib/domain/ordering.ts`). A drop writes one new key between its neighbours, so moving a card never renumbers a column.
 - **One write path on the server:** `putTask` in `src/lib/server/task-service.ts` enforces ownership and last-write-wins, and logs activity events (`activity_events`: created, moved, completed, reopened, rescheduled, updated, deleted) for the Phase 2 nudges.
 
 ## Design tokens
