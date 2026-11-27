@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useTaskActions, useTasks } from "@/lib/client/tasks";
-import { hasActiveFilters, matchesFilters } from "@/lib/domain/filters";
+import { hasActiveFilters, matchesFilters, splitDoneTasks } from "@/lib/domain/filters";
 import { normalizeLabels, type Task, tasksInColumn } from "@/lib/domain/task";
 import { TASK_STATUSES, type TaskStatus } from "@/lib/domain/task-status";
 import { useNow } from "@/lib/hooks/use-now";
 import { useBoardFilters } from "@/lib/stores/board-filters";
 import { BoardDnd } from "./BoardDnd";
+import { DoneOlderToggle } from "./DoneOlderToggle";
 import { FilterBar } from "./FilterBar";
 
 const EMPTY_COLUMN_COPY: Record<TaskStatus, string> = {
@@ -33,13 +34,20 @@ export function BoardView() {
     () => tasks.filter((task) => matchesFilters(task, filters, now)),
     [tasks, filters, now],
   );
-  const columns = useMemo(
-    () =>
-      Object.fromEntries(
-        TASK_STATUSES.map((status) => [status, tasksInColumn(visible, status)]),
-      ) as Record<TaskStatus, Task[]>,
-    [visible],
+  const [showOlderDone, setShowOlderDone] = useState(false);
+  const olderDone = useMemo(
+    () => splitDoneTasks(tasksInColumn(visible, "done"), now).older,
+    [visible, now],
   );
+  const columns = useMemo(() => {
+    const hidden = new Set(showOlderDone ? [] : olderDone.map((task) => task.id));
+    return Object.fromEntries(
+      TASK_STATUSES.map((status) => [
+        status,
+        tasksInColumn(visible, status).filter((task) => !hidden.has(task.id)),
+      ]),
+    ) as Record<TaskStatus, Task[]>;
+  }, [visible, olderDone, showOlderDone]);
   const labels = useMemo(
     () =>
       normalizeLabels(tasks.flatMap((task) => task.labels)).sort((a, b) =>
@@ -74,6 +82,15 @@ export function BoardView() {
               : EMPTY_COLUMN_COPY[status]}
           </p>
         )}
+        renderFooter={(status) =>
+          status === "done" && olderDone.length > 0 ? (
+            <DoneOlderToggle
+              count={olderDone.length}
+              expanded={showOlderDone}
+              onToggle={() => setShowOlderDone((shown) => !shown)}
+            />
+          ) : null
+        }
       />
     </>
   );

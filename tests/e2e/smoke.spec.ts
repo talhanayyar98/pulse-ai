@@ -138,6 +138,51 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await expect(column("To Do").getByRole("listitem")).toHaveCount(0);
   });
 
+  await test.step("Done collapses tasks completed more than a week ago", async () => {
+    const tenDaysAgo = new Date(Date.now() - 10 * 86_400_000).toISOString();
+    const response = await page.request.post("/api/sync", {
+      data: {
+        ops: [
+          {
+            opId: crypto.randomUUID(),
+            type: "task.put",
+            task: {
+              id: crypto.randomUUID(),
+              title: "File last year's taxes",
+              description: "",
+              status: "done",
+              priority: "medium",
+              labels: [],
+              order: "a0",
+              dueAt: null,
+              allDay: false,
+              horizon: "none",
+              subtasks: [],
+              statusChangedAt: tenDaysAgo,
+              completedAt: tenDaysAgo,
+              createdAt: tenDaysAgo,
+              updatedAt: new Date().toISOString(),
+              deletedAt: null,
+            },
+          },
+        ],
+      },
+    });
+    expect(response.ok()).toBe(true);
+
+    await page.reload();
+    const done = column("Done");
+    await expect(done.getByRole("button", { name: /Water the plants/ })).toBeVisible();
+    await expect(done.getByText("File last year's taxes")).toBeHidden();
+    const toggle = done.getByRole("button", { name: /done over 7 days ago/ });
+    await toggle.click();
+    await expect(done.getByText("File last year's taxes")).toBeVisible();
+    await expect(done.getByRole("button", { name: /Hide 1 older task/ })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+  });
+
   await test.step("manifest is linked and served", async () => {
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(href).toBeTruthy();
