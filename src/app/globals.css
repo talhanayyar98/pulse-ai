@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens: the one place to tune the palette.
+ * Three hues only: black (base), purple (brand), neon (accent). Text is white at fixed opacities.
+ * WCAG AA contrast for every text/background pairing is asserted in tests/unit/tokens.test.ts.
+ *
+ * Usage rules:
+ *  - brand (#8b5cf6) is for fills, borders, glows and active states. For purple TEXT use brand-text.
+ *  - Filled purple buttons use brand-deep → brand-strong with on-brand text.
+ *  - neon is an accent: primary CTAs (with on-neon text), focus rings, due-soon and success states.
+ */
+@theme {
+  --color-*: initial;
+
+  /* Black: base */
+  --color-base: #07070b;
+  --color-surface: #101018;
+  --color-surface-raised: #171724;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+
+  /* Purple: brand */
+  --color-brand: #8b5cf6;
+  --color-brand-deep: #5b21b6;
+  --color-brand-strong: #7c3aed;
+  --color-brand-text: #a78bfa;
+  --color-brand-glow: rgb(139 92 246 / 0.35);
+
+  /* Neon: accent */
+  --color-neon: #39ff14;
+  --color-neon-glow: rgb(57 255 20 / 0.35);
+
+  /* Text */
+  --color-fg: rgb(255 255 255 / 0.92);
+  --color-fg-secondary: rgb(255 255 255 / 0.68);
+  --color-fg-muted: rgb(255 255 255 / 0.5);
+  --color-on-neon: #07070b;
+  --color-on-brand: #ffffff;
+
+  /* Neutral overlay for hover/pressed tints (never for text) */
+  --color-white: #ffffff;
+
+  /* Elevation and glow */
+  --shadow-lift: 0 18px 40px -12px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.45);
+  --shadow-glow-brand: 0 0 0 1px rgb(139 92 246 / 0.55), 0 0 28px -6px var(--color-brand-glow);
+  --shadow-glow-neon: 0 0 0 1px rgb(57 255 20 / 0.65), 0 0 22px -6px var(--color-neon-glow);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-view-in: view-in 420ms var(--ease-out-expo) both;
+  --animate-drift: drift 28s ease-in-out infinite alternate;
+  --animate-drift-slow: drift 40s ease-in-out -12s infinite alternate-reverse;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes view-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @keyframes drift {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(6%, 4%, 0) scale(1.08);
+    }
+  }
+
+  @keyframes float {
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
+
+/* next/font exposes these variables on <html>; inline so utilities resolve them at use site. */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+}
+
+@utility glass {
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    /* Background lives on <html> only so the fixed ambient layer (z-index -1) paints above it. */
+    background-color: var(--color-base);
+  }
+
+  body {
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-neon);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-glow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
