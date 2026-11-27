@@ -2,6 +2,7 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 
 test("sign in, capture and edit a task, install and work offline", async ({ page, context }) => {
   const column = (name: string) => page.getByRole("region", { name });
+  const savesSettled = trackSaves(page);
 
   await test.step("signed-out visitors are sent to sign in", async () => {
     await page.goto("/");
@@ -44,6 +45,7 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
   });
 
   await test.step("the task survives a reload", async () => {
+    await savesSettled();
     await page.reload();
     await expect(column("To Do").getByRole("button", { name: /Buy oat milk/ })).toBeVisible();
   });
@@ -122,14 +124,19 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await card.focus();
     await page.keyboard.press("Space");
     await expect(card).toHaveAttribute("aria-pressed", "true");
-    await page.keyboard.press("ArrowRight");
+    // dnd-kit measures drop targets just after the lift; an arrow pressed within those few
+    // milliseconds is ignored (no person is that fast), so retry until the card moves.
     const moved = column("In Progress").getByRole("button", { name: /Call the bank/ });
-    await expect(moved).toBeVisible();
+    await expect(async () => {
+      await page.keyboard.press("ArrowRight");
+      await expect(moved).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 5_000 });
     await page.keyboard.press("Space");
     await expect(moved).not.toHaveAttribute("aria-pressed", "true");
   });
 
   await test.step("every move survives a reload", async () => {
+    await savesSettled();
     await page.reload();
     await expect(
       column("In Progress").getByRole("button", { name: /Call the bank/ }),
@@ -236,4 +243,22 @@ async function dragWithMouse(
   const endY = position === "top" ? to.y + 4 : to.y + to.height / 2;
   await page.mouse.move(to.x + to.width / 2, endY, { steps: 20 });
   await page.mouse.up();
+}
+
+/**
+ * Edits save in the background. M5 adds an IndexedDB outbox that survives reloads; until
+ * then, wait for in-flight saves before reloading, as a person would see them finish.
+ */
+function trackSaves(page: Page): () => Promise<void> {
+  let inFlight = 0;
+  const isSave = (url: string) => url.endsWith("/api/sync");
+  page.on("request", (request) => {
+    if (isSave(request.url())) inFlight++;
+  });
+  const settle = (request: { url(): string }) => {
+    if (isSave(request.url())) inFlight--;
+  };
+  page.on("requestfinished", settle);
+  page.on("requestfailed", settle);
+  return () => expect.poll(() => inFlight).toBe(0);
 }
