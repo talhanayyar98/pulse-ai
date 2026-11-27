@@ -190,6 +190,34 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     );
   });
 
+  await test.step("overdue tasks pulse and are counted in the header and navigation", async () => {
+    await page.keyboard.press("n");
+    await page.keyboard.type("Pay the electricity bill");
+    await page.keyboard.press("Enter");
+    await column("To Do")
+      .getByRole("button", { name: /Pay the electricity bill/ })
+      .click();
+
+    const yesterday = new Date(Date.now() - 86_400_000);
+    const localDate = [
+      yesterday.getFullYear(),
+      String(yesterday.getMonth() + 1).padStart(2, "0"),
+      String(yesterday.getDate()).padStart(2, "0"),
+    ].join("-");
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    await drawer.getByLabel("Due date").fill(localDate);
+    await page.keyboard.press("Escape");
+
+    const card = column("To Do").getByRole("button", { name: /Pay the electricity bill/ });
+    await expect(card).toContainText("Overdue · Yesterday");
+    await expect(page.getByRole("main").getByText("1 overdue", { exact: true })).toBeVisible();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Views" })
+        .getByRole("link", { name: /Board \(1 overdue\)/ }),
+    ).toBeVisible();
+  });
+
   await test.step("manifest is linked and served", async () => {
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(href).toBeTruthy();

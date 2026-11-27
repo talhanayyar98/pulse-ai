@@ -52,6 +52,7 @@
   --animate-drift: drift 28s ease-in-out infinite alternate;
   --animate-drift-slow: drift 40s ease-in-out -12s infinite alternate-reverse;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-overdue: overdue-pulse 2.4s ease-in-out infinite;
 
   @keyframes view-in {
     from {
@@ -72,6 +73,21 @@
   @keyframes float {
     50% {
       transform: translateY(-6px);
+    }
+  }
+
+  /* Overdue cards: a neon edge that breathes. Reduced motion keeps the static neon border. */
+  @keyframes overdue-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px rgb(57 255 20 / 0.3),
+        0 0 0 0 rgb(57 255 20 / 0);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px rgb(57 255 20 / 0.8),
+        0 0 20px -2px rgb(57 255 20 / 0.45);
     }
   }
 }

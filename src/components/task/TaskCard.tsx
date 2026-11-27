@@ -2,6 +2,7 @@
 
 import { ClockIcon, SubtasksIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
+import { isDueSoon, isOverdue } from "@/lib/domain/filters";
 import type { Task } from "@/lib/domain/task";
 import { formatDue } from "@/lib/due-date";
 import { useNow } from "@/lib/hooks/use-now";
@@ -29,12 +30,15 @@ export function TaskCard({
   const now = useNow();
   const due = formatDue(task, now);
   const subtasksDone = task.subtasks.filter((subtask) => subtask.done).length;
+  const overdue = isOverdue(task, now);
+  const dueSoon = isDueSoon(task, now);
 
   return (
     <div
       className={cn(
         "rounded-xl border p-3 text-left shadow-[0_1px_0_rgb(255_255_255/0.04)_inset] transition-[border-color,box-shadow,opacity]",
         STATE_CLASS[state],
+        overdue && state === "idle" && "animate-overdue border-neon/60",
       )}
     >
       <div className="flex items-start gap-2">
@@ -57,8 +61,14 @@ export function TaskCard({
             </span>
           ))}
           {due && (
-            <span className="inline-flex items-center gap-1 font-mono text-fg-secondary">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 font-mono",
+                overdue || dueSoon ? "text-neon" : "text-fg-secondary",
+              )}
+            >
               <ClockIcon className="size-3.5" />
+              {overdue && "Overdue · "}
               {due}
             </span>
           )}

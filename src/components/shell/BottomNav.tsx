@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { springs } from "@/lib/motion";
 import { NAV_ITEMS, isActivePath } from "./nav";
+import { OverdueBadge } from "./OverdueBadge";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -41,6 +42,9 @@ export function BottomNav() {
                     />
                   )}
                   <Icon className={cn("relative size-5", active && "text-brand-text")} />
+                  {href === "/board" && (
+                    <OverdueBadge variant="count" className="absolute -top-1 right-1.5" />
+                  )}
                 </motion.span>
                 {label}
               </Link>

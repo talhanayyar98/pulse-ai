@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 import { springs } from "@/lib/motion";
 import { Logo } from "./Logo";
 import { NAV_ITEMS, isActivePath } from "./nav";
+import { OverdueBadge } from "./OverdueBadge";
 import { SidebarQuickActions } from "./QuickActions";
 import { UserMenu } from "./UserMenu";
 
@@ -48,7 +49,7 @@ export function Sidebar() {
                   <motion.span
                     whileTap={{ scale: 0.96 }}
                     transition={springs.press}
-                    className="relative flex items-center gap-3"
+                    className="relative flex flex-1 items-center gap-3"
                   >
                     <Icon
                       className={cn(
@@ -57,6 +58,7 @@ export function Sidebar() {
                       )}
                     />
                     {label}
+                    {href === "/board" && <OverdueBadge variant="count" className="ml-auto" />}
                   </motion.span>
                 </Link>
               </li>
