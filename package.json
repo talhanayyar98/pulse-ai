@@ -14,19 +14,27 @@
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --project unit",
+    "test:watch": "vitest --project unit",
+    "test:integration": "vitest run --project integration",
     "test:e2e": "playwright test",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "icons": "node scripts/generate-icons.ts"
   },
   "dependencies": {
     "@serwist/turbopack": "^9.6.0",
+    "@tanstack/react-query": "^5.108.4",
+    "date-fns": "^4.4.0",
+    "mongoose": "^9.13.1",
     "motion": "^14.14.0",
     "next": "^16.4.6",
+    "next-auth": "5.0.0-beta.32",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "serwist": "^9.6.0"
+    "react-markdown": "^10.1.0",
+    "serwist": "^9.6.0",
+    "zod": "^4.6.7",
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",

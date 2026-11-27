@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/board",
     scope: "/",
     display: "standalone",
-    background_color: palette.base,
-    theme_color: palette.base,
+    background_color: palette.canvas,
+    theme_color: palette.canvas,
     categories: ["productivity"],
     // Re-use an open Pulse window for shortcuts and (later) notification clicks.
     launch_handler: { client_mode: ["navigate-existing", "auto"] },
