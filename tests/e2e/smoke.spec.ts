@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 test("sign in, capture and edit a task, install and work offline", async ({ page, context }) => {
   const column = (name: string) => page.getByRole("region", { name });
@@ -78,6 +78,49 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await expect(moved).toContainText("09:15");
   });
 
+  await test.step("mouse drag reorders within a column and moves across columns", async () => {
+    const cardIn = (columnName: string, title: string) =>
+      column(columnName).getByRole("button", { name: new RegExp(title) });
+    const titlesIn = (columnName: string) =>
+      column(columnName).getByRole("listitem").allInnerTexts();
+
+    // Newest first: "Water the plants" sits above "Call the bank". Drag "Call" to the top.
+    expect((await titlesIn("To Do"))[0]).toContain("Water the plants");
+    await dragWithMouse(
+      page,
+      cardIn("To Do", "Call the bank"),
+      cardIn("To Do", "Water the plants"),
+      "top",
+    );
+    await expect.poll(async () => (await titlesIn("To Do"))[0]).toContain("Call the bank");
+
+    // Then drag "Water the plants" into the empty Done column.
+    await dragWithMouse(page, cardIn("To Do", "Water the plants"), column("Done"), "center");
+    await expect(cardIn("Done", "Water the plants")).toBeVisible();
+  });
+
+  await test.step("keyboard drag: Space to lift, arrows to move, Space to drop", async () => {
+    // Wait for each state a sighted keyboard user would see before pressing the next key.
+    const card = column("To Do").getByRole("button", { name: /Call the bank/ });
+    await card.focus();
+    await page.keyboard.press("Space");
+    await expect(card).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("ArrowRight");
+    const moved = column("In Progress").getByRole("button", { name: /Call the bank/ });
+    await expect(moved).toBeVisible();
+    await page.keyboard.press("Space");
+    await expect(moved).not.toHaveAttribute("aria-pressed", "true");
+  });
+
+  await test.step("every move survives a reload", async () => {
+    await page.reload();
+    await expect(
+      column("In Progress").getByRole("button", { name: /Call the bank/ }),
+    ).toBeVisible();
+    await expect(column("Done").getByRole("button", { name: /Water the plants/ })).toBeVisible();
+    await expect(column("To Do").getByRole("listitem")).toHaveCount(0);
+  });
+
   await test.step("manifest is linked and served", async () => {
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(href).toBeTruthy();
@@ -112,3 +155,23 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await context.setOffline(false);
   });
 });
+
+/** Drags like a person: press, nudge past the activation distance, glide, release. */
+async function dragWithMouse(
+  page: Page,
+  source: Locator,
+  target: Locator,
+  position: "top" | "center",
+): Promise<void> {
+  const from = await source.boundingBox();
+  const to = await target.boundingBox();
+  if (!from || !to) throw new Error("Drag source or target is not visible");
+  const startX = from.x + from.width / 2;
+  const startY = from.y + from.height / 2;
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(startX + 8, startY + 8, { steps: 4 });
+  const endY = position === "top" ? to.y + 4 : to.y + to.height / 2;
+  await page.mouse.move(to.x + to.width / 2, endY, { steps: 20 });
+  await page.mouse.up();
+}

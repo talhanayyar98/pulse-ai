@@ -1,13 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { TaskCard } from "@/components/task/TaskCard";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/Button";
-import { useTasks } from "@/lib/client/tasks";
-import { tasksInColumn } from "@/lib/domain/task";
+import { useTaskActions, useTasks } from "@/lib/client/tasks";
+import { type Task, tasksInColumn } from "@/lib/domain/task";
 import { TASK_STATUSES, type TaskStatus } from "@/lib/domain/task-status";
-import { springs } from "@/lib/motion";
-import { BoardColumn } from "./BoardColumn";
+import { BoardDnd } from "./BoardDnd";
 
 const EMPTY_COLUMN_COPY: Record<TaskStatus, string> = {
   backlog: "Ideas wait here. No pressure.",
@@ -18,6 +16,15 @@ const EMPTY_COLUMN_COPY: Record<TaskStatus, string> = {
 
 export function BoardView() {
   const { data: tasks, isPending, isError, refetch } = useTasks();
+  const actions = useTaskActions();
+
+  const columns = useMemo(
+    () =>
+      Object.fromEntries(
+        TASK_STATUSES.map((status) => [status, tasksInColumn(tasks ?? [], status)]),
+      ) as Record<TaskStatus, Task[]>,
+    [tasks],
+  );
 
   if (isError) {
     return (
@@ -31,49 +38,15 @@ export function BoardView() {
   }
 
   return (
-    <div className="flex flex-1 snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-6 md:scroll-px-8 md:px-8 lg:grid lg:grid-cols-4 lg:overflow-visible">
-      {TASK_STATUSES.map((status) => {
-        const columnTasks = tasks ? tasksInColumn(tasks, status) : [];
-        return (
-          <BoardColumn key={status} status={status} count={columnTasks.length}>
-            {isPending ? (
-              <CardSkeletons />
-            ) : (
-              <ul className="flex flex-col gap-2">
-                <AnimatePresence initial={false} mode="popLayout">
-                  {columnTasks.map((task) => (
-                    <motion.li
-                      key={task.id}
-                      layoutId={task.id}
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      transition={springs.snappy}
-                    >
-                      <TaskCard task={task} />
-                    </motion.li>
-                  ))}
-                </AnimatePresence>
-                {columnTasks.length === 0 && (
-                  <li className="grid h-36 place-items-center rounded-xl border border-dashed border-line px-4 text-center text-sm text-fg-muted">
-                    {EMPTY_COLUMN_COPY[status]}
-                  </li>
-                )}
-              </ul>
-            )}
-          </BoardColumn>
-        );
-      })}
-    </div>
-  );
-}
-
-function CardSkeletons() {
-  return (
-    <div aria-hidden className="flex flex-col gap-2">
-      {[0, 1].map((index) => (
-        <div key={index} className="h-16 animate-pulse rounded-xl bg-white/4" />
-      ))}
-    </div>
+    <BoardDnd
+      columns={columns}
+      loading={isPending}
+      onMove={(taskId, status, order) => actions.update(taskId, { status, order })}
+      renderEmpty={(status) => (
+        <p className="grid h-36 place-items-center rounded-xl border border-dashed border-line px-4 text-center text-sm text-fg-muted">
+          {EMPTY_COLUMN_COPY[status]}
+        </p>
+      )}
+    />
   );
 }
