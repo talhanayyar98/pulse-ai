@@ -48,6 +48,23 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await expect(column("To Do").getByRole("button", { name: /Buy oat milk/ })).toBeVisible();
   });
 
+  await test.step("filters narrow the board, persist across reloads and clear", async () => {
+    const filtersGroup = page.getByRole("group", { name: "Filter tasks" });
+    await filtersGroup.getByRole("button", { name: "High" }).click();
+    await expect(column("To Do").getByRole("listitem")).toHaveCount(1);
+    await expect(filtersGroup).toContainText("1 of 3");
+
+    await page.reload();
+    await expect(column("To Do").getByRole("listitem")).toHaveCount(1);
+    await expect(filtersGroup.getByRole("button", { name: "High" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await filtersGroup.getByRole("button", { name: "Clear" }).click();
+    await expect(column("To Do").getByRole("listitem")).toHaveCount(3);
+  });
+
   await test.step("the drawer edits status and subtasks", async () => {
     await column("To Do")
       .getByRole("button", { name: /Buy oat milk/ })
