@@ -23,11 +23,11 @@ function token(name: string) {
 }
 
 const AA_NORMAL_TEXT = 4.5;
-const SURFACES = ["base", "surface", "surface-raised"] as const;
+const SURFACES = ["canvas", "surface", "surface-raised"] as const;
 
 describe("design tokens", () => {
   it("keeps src/lib/theme.ts in sync with the CSS tokens", () => {
-    expect(tokens.get("base")).toBe(palette.base);
+    expect(tokens.get("canvas")).toBe(palette.canvas);
     expect(tokens.get("brand")).toBe(palette.brand);
     expect(tokens.get("brand-deep")).toBe(palette.brandDeep);
     expect(tokens.get("brand-strong")).toBe(palette.brandStrong);
@@ -53,6 +53,11 @@ describe("design tokens", () => {
       expect(contrastRatio(token(text), token(fill))).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
     });
   }
+
+  it("never names a color token after a font-size token (text-base would set both)", () => {
+    const fontSizes = ["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl"];
+    expect([...tokens.keys()].filter((name) => fontSizes.includes(name))).toEqual([]);
+  });
 
   it("documents why raw brand purple is not a text color on cards", () => {
     expect(contrastRatio(token("brand"), token("surface-raised"))).toBeLessThan(AA_NORMAL_TEXT);

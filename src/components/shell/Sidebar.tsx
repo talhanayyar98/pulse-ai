@@ -7,15 +7,19 @@ import { cn } from "@/lib/cn";
 import { springs } from "@/lib/motion";
 import { Logo } from "./Logo";
 import { NAV_ITEMS, isActivePath } from "./nav";
+import { SidebarQuickActions } from "./QuickActions";
+import { UserMenu } from "./UserMenu";
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line glass px-3 py-5 md:flex">
-      <Link href="/board" className="mb-8 rounded-xl px-2 py-1" aria-label="Pulse home">
+      <Link href="/board" className="mb-6 rounded-xl px-2 py-1" aria-label="Pulse home">
         <Logo />
       </Link>
+
+      <SidebarQuickActions />
 
       <nav aria-label="Views">
         <p className="mb-2 px-3 font-mono text-[11px] tracking-[0.18em] text-fg-muted uppercase">
@@ -60,6 +64,10 @@ export function Sidebar() {
           })}
         </ul>
       </nav>
+
+      <div className="mt-auto border-t border-line pt-3">
+        <UserMenu />
+      </div>
     </aside>
   );
 }
