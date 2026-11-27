@@ -37,7 +37,7 @@ export function BoardColumn({
     <section
       aria-label={label}
       className={cn(
-        "flex w-[min(20rem,82vw)] shrink-0 snap-start flex-col rounded-2xl border transition-[border-color,box-shadow,background-color] duration-200 lg:w-auto lg:shrink",
+        "flex w-[min(20rem,82vw)] shrink-0 snap-start flex-col rounded-2xl border transition-[border-color,box-shadow,background-color] duration-200 xl:w-auto xl:shrink",
         highlighted ? "border-brand/70 bg-brand/8 shadow-glow-brand" : "border-line bg-surface/70",
       )}
     >

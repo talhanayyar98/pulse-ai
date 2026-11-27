@@ -39,7 +39,8 @@ export function FilterBar({
     <div
       role="group"
       aria-label="Filter tasks"
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 pb-5 md:px-8"
+      // One sideways-scrolling row on phones so the board stays in view; wraps on wider screens.
+      className="flex [scrollbar-width:none] items-center gap-x-4 gap-y-2 overflow-x-auto px-5 pb-5 md:flex-wrap md:overflow-visible md:px-8 [&>*]:shrink-0"
     >
       <Segmented
         label="Planning horizon"
@@ -62,7 +63,7 @@ export function FilterBar({
       </ChipGroup>
 
       {labelChips.length > 0 && (
-        <ChipGroup label="Labels" className="max-w-full overflow-x-auto">
+        <ChipGroup label="Labels">
           {labelChips.map((label) => (
             <Chip key={label} pressed={selectedLabel(label)} onClick={() => toggleLabel(label)}>
               <span className="text-brand-text">#</span>

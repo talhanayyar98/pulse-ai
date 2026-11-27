@@ -261,7 +261,7 @@ export function BoardDnd({ columns, loading, onMove, renderEmpty, renderFooter }
       onDragEnd={handleDragEnd}
       onDragCancel={() => setDrag(null)}
     >
-      <div className="flex flex-1 snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-6 md:scroll-px-8 md:px-8 lg:grid lg:grid-cols-4 lg:overflow-visible">
+      <div className="flex flex-1 snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-6 md:scroll-px-8 md:px-8 xl:grid xl:grid-cols-4 xl:overflow-visible">
         {TASK_STATUSES.map((status) => {
           const ids = columnIds[status];
           return (
