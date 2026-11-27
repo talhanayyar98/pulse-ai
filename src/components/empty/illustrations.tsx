@@ -1,5 +1,5 @@
 /*
- * Small decorative SVGs for empty states: purple linework with a single neon accent.
+ * Small decorative SVGs for empty states: violet linework with one bright accent.
  * aria-hidden because the adjacent heading carries the meaning.
  */
 
@@ -25,7 +25,7 @@ export function WeekIllustration() {
           width="11"
           height={day === 4 ? 40 : 14 + ((day * 7) % 18)}
           rx="4"
-          className={day === 4 ? "fill-neon" : "fill-brand/35"}
+          className={day === 4 ? "fill-accent" : "fill-brand/35"}
         />
       ))}
       <circle cx="26" cy="26" r="4" className="fill-brand" />
@@ -54,7 +54,7 @@ export function MonthIllustration() {
           width="16"
           height="12"
           rx="4"
-          className={i === 8 ? "fill-neon" : "fill-brand/25"}
+          className={i === 8 ? "fill-info" : "fill-brand/25"}
         />
       ))}
       <path d="M22 22h28" strokeWidth="4" strokeLinecap="round" className="stroke-white/15" />
@@ -74,7 +74,7 @@ export function OfflineIllustration() {
         strokeDasharray="4 10"
         className="stroke-brand/60"
       />
-      <circle cx="122" cy="62" r="7" className="fill-neon" />
+      <circle cx="122" cy="62" r="7" className="fill-accent" />
     </svg>
   );
 }

@@ -10,6 +10,7 @@ import { Overlay } from "@/components/ui/Overlay";
 import { cn } from "@/lib/cn";
 import { useTaskActions, useTasks } from "@/lib/client/tasks";
 import { parseQuickAdd } from "@/lib/domain/quick-add";
+import { labelTone } from "@/lib/label-tone";
 import { TASK_STATUS_LABEL } from "@/lib/domain/task-status";
 import { type PaletteMode, useUi } from "@/lib/stores/ui";
 import { useToasts } from "@/lib/stores/toasts";
@@ -61,7 +62,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
     items.push({
       id: "create",
       group: "Create",
-      icon: <PlusIcon className="size-4 text-neon" />,
+      icon: <PlusIcon className="size-4 text-accent" />,
       label: (
         <>
           Create <span className="font-semibold text-fg">“{parsed.title}”</span>
@@ -70,7 +71,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
       meta: (
         <span className="flex items-center gap-1.5">
           {parsed.labels.map((label) => (
-            <span key={label} className="rounded bg-brand/15 px-1.5 text-brand-text">
+            <span key={label} className={cn("rounded px-1.5", labelTone(label).chip)}>
               {label}
             </span>
           ))}
@@ -142,11 +143,13 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
 
   return (
     <div className="overflow-hidden rounded-2xl">
-      <div className="flex items-center gap-3 border-b border-line px-4">
+      <div className="relative flex items-center gap-3 border-b border-line px-4">
         {mode === "create" ? (
-          <PlusIcon className="size-5 text-neon" />
+          <span className="grid size-7 place-items-center rounded-lg bg-cta text-on-brand shadow-cta">
+            <PlusIcon className="size-4" strokeWidth={2.25} />
+          </span>
         ) : (
-          <SearchIcon className="size-5 text-fg-muted" />
+          <SearchIcon className="size-5 text-brand-text" />
         )}
         <input
           data-autofocus
@@ -188,10 +191,17 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
                 onMouseMove={() => setActiveIndex(index)}
                 onClick={item.run}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-secondary",
-                  index === active && "bg-brand/15 text-fg shadow-glow-brand",
+                  "relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-secondary transition-[background-color,color,box-shadow,padding] duration-150",
+                  index === active &&
+                    "bg-linear-to-r from-brand/25 to-accent/8 pl-4 text-fg shadow-glow-brand",
                 )}
               >
+                {index === active && (
+                  <span
+                    aria-hidden
+                    className="absolute top-2 bottom-2 left-1 w-0.75 rounded-full bg-linear-to-b from-brand-text to-accent"
+                  />
+                )}
                 {item.icon}
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 {item.meta && <span className="shrink-0 text-xs">{item.meta}</span>}
@@ -200,7 +210,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
           ))}
         </ul>
       ) : (
-        <p className="px-4 py-6 text-center text-sm text-fg-muted">
+        <p className="animate-fade-up px-4 py-6 text-center text-sm text-fg-muted">
           {mode === "create"
             ? "Type a title to create a task."
             : "No matches. Keep typing to create a task."}
@@ -217,8 +227,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
         </span>
         <span className="ml-auto font-mono">
           <span className="text-brand-text">#label</span> ·{" "}
-          <span className="text-brand-text">!high</span>{" "}
-          <span className="text-brand-text">!urgent</span>
+          <span className="text-accent">!high</span> <span className="text-danger">!urgent</span>
         </span>
       </footer>
     </div>

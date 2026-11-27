@@ -8,6 +8,7 @@ import { Segmented } from "@/components/ui/Segmented";
 import { cn } from "@/lib/cn";
 import { hasActiveFilters, HORIZON_FILTERS, type HorizonFilter } from "@/lib/domain/filters";
 import { PRIORITIES, PRIORITY_LABEL } from "@/lib/domain/task";
+import { labelTone } from "@/lib/label-tone";
 import { useBoardFilters } from "@/lib/stores/board-filters";
 
 const HORIZON_LABEL: Record<HorizonFilter, string> = {
@@ -66,7 +67,7 @@ export function FilterBar({
         <ChipGroup label="Labels">
           {labelChips.map((label) => (
             <Chip key={label} pressed={selectedLabel(label)} onClick={() => toggleLabel(label)}>
-              <span className="text-brand-text">#</span>
+              <span className={labelTone(label).text}>#</span>
               {label}
             </Chip>
           ))}
@@ -78,8 +79,8 @@ export function FilterBar({
           <span className="font-mono text-xs text-fg-secondary">
             {visibleCount} of {totalCount}
           </span>
-          <Button variant="ghost" size="sm" onClick={clear}>
-            <XIcon className="size-3.5" />
+          <Button variant="ghost" size="sm" className="group" onClick={clear}>
+            <XIcon className="size-3.5 transition-transform duration-300 ease-spring group-hover:rotate-90" />
             Clear
           </Button>
         </div>
@@ -111,10 +112,10 @@ function Chip({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition-[color,background-color,border-color,box-shadow]",
+        "inline-flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition-[color,background-color,border-color,box-shadow,translate,scale] duration-200 active:scale-95",
         pressed
-          ? "border-brand/60 bg-brand/20 text-fg shadow-glow-brand"
-          : "border-line text-fg-secondary hover:border-line-strong hover:text-fg",
+          ? "border-brand/60 bg-linear-to-r from-brand/35 to-accent/15 text-fg shadow-glow-brand"
+          : "border-line bg-surface/40 text-fg-secondary hover:-translate-y-px hover:border-line-strong hover:bg-white/5 hover:text-fg",
       )}
     >
       {children}

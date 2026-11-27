@@ -38,10 +38,15 @@ export function BottomNav() {
                     <motion.span
                       layoutId="bottom-nav-active"
                       transition={springs.snappy}
-                      className="absolute inset-0 rounded-full bg-brand/20 shadow-glow-brand"
+                      className="absolute inset-0 rounded-full bg-linear-to-r from-brand/35 to-accent/20 shadow-glow-brand"
                     />
                   )}
-                  <Icon className={cn("relative size-5", active && "text-brand-text")} />
+                  <Icon
+                    className={cn(
+                      "relative size-5 transition-[color,scale] duration-300 ease-spring",
+                      active && "scale-110 text-brand-text",
+                    )}
+                  />
                   {href === "/board" && (
                     <OverdueBadge variant="count" className="absolute -top-1 right-1.5" />
                   )}

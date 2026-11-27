@@ -277,9 +277,9 @@ export function BoardDnd({ columns, loading, onMove, renderEmpty, renderFooter }
               ) : (
                 <>
                   <ul className="flex flex-col gap-2">
-                    {ids.flatMap((id) => {
+                    {ids.flatMap((id, index) => {
                       const task = tasksById.get(id);
-                      return task ? <SortableTaskCard key={id} task={task} /> : [];
+                      return task ? <SortableTaskCard key={id} task={task} index={index} /> : [];
                     })}
                   </ul>
                   {ids.length === 0 && renderEmpty(status)}
@@ -295,7 +295,7 @@ export function BoardDnd({ columns, loading, onMove, renderEmpty, renderFooter }
           {activeTask && (
             <motion.div
               initial={{ scale: 1, rotate: 0 }}
-              animate={{ scale: 1.04, rotate: -1.5 }}
+              animate={{ scale: 1.05, rotate: -2 }}
               transition={springs.snappy}
             >
               <TaskCard task={activeTask} state="lifted" />
@@ -316,8 +316,12 @@ function DragPortal({ children }: Readonly<{ children: ReactNode }>) {
 function CardSkeletons() {
   return (
     <div aria-hidden className="flex flex-col gap-2">
-      {[0, 1].map((index) => (
-        <div key={index} className="h-16 animate-pulse rounded-xl bg-white/4" />
+      {[0, 1, 2].map((index) => (
+        <div
+          key={index}
+          className="h-16 skeleton rounded-xl border border-line"
+          style={{ animationDelay: `${index * 120}ms`, opacity: 1 - index * 0.25 }}
+        />
       ))}
     </div>
   );

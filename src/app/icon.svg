@@ -2,11 +2,16 @@
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#5b21b6"/>
+      <stop offset="0.6" stop-color="#5b21b6"/>
+      <stop offset="1" stop-color="#c026d3"/>
     </linearGradient>
     <radialGradient id="shine" cx="0.25" cy="0.15" r="0.85">
-      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.7"/>
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.75"/>
       <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ember" cx="0.85" cy="0.9" r="0.7">
+      <stop offset="0" stop-color="#e879f9" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#e879f9" stop-opacity="0"/>
     </radialGradient>
     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="1.6"/>
@@ -14,7 +19,8 @@
   </defs>
   <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#bg)"/>
   <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#shine)"/>
-  <g transform="translate(6.399999999999999 6.399999999999999) scale(0.8)" color="#39ff14">
+  <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#ember)"/>
+  <g transform="translate(6.399999999999999 6.399999999999999) scale(0.8)" color="#ffffff">
     <g filter="url(#glow)" opacity="0.75"><path d="M6 34h12l5-12 8 24 7-32 5 20h15" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
     <path d="M6 34h12l5-12 8 24 7-32 5 20h15" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   </g>

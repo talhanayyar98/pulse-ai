@@ -17,7 +17,7 @@ export function DoneOlderToggle({
       type="button"
       aria-expanded={expanded}
       onClick={onToggle}
-      className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line px-3 py-2.5 text-xs text-fg-secondary transition-colors hover:border-brand/50 hover:text-fg"
+      className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line px-3 py-2.5 text-xs text-fg-secondary transition-colors duration-200 hover:border-success/50 hover:bg-success/5 hover:text-fg"
     >
       <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={springs.snappy}>
         <ChevronDownIcon className="size-4" />

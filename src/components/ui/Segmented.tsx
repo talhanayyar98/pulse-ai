@@ -38,7 +38,7 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={label}
       onKeyDown={onKeyDown}
-      className="inline-flex flex-wrap rounded-xl border border-line bg-canvas/40 p-0.5"
+      className="inline-flex flex-wrap rounded-xl border border-line bg-canvas/50 p-0.5 shadow-[inset_0_1px_2px_rgb(0_0_0/0.35)]"
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -51,15 +51,15 @@ export function Segmented<T extends string>({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(option.value)}
             className={cn(
-              "relative rounded-[10px] px-2.5 py-1 text-xs font-medium transition-colors",
-              active ? "text-fg" : "text-fg-secondary hover:text-fg",
+              "relative rounded-[10px] px-2.5 py-1 text-xs font-medium transition-colors duration-200 active:scale-95",
+              active ? "text-fg" : "text-fg-secondary hover:bg-white/4 hover:text-fg",
             )}
           >
             {active && (
               <motion.span
                 layoutId={thumbId}
                 transition={springs.snappy}
-                className="absolute inset-0 rounded-[10px] bg-brand/20 shadow-glow-brand"
+                className="absolute inset-0 rounded-[10px] bg-linear-to-r from-brand/40 to-accent/25 shadow-glow-brand"
               />
             )}
             <span className="relative flex items-center gap-1.5">

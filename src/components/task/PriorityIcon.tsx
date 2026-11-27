@@ -3,7 +3,14 @@ import { PRIORITY_LABEL, type Priority } from "@/lib/domain/task";
 
 const LEVEL: Record<Priority, number> = { low: 1, medium: 2, high: 3, urgent: 4 };
 
-/** Signal-strength bars: purple for low → high, all neon for urgent. */
+const TONE: Record<Priority, string> = {
+  low: "text-info",
+  medium: "text-brand-text",
+  high: "text-accent",
+  urgent: "text-danger",
+};
+
+/** Signal-strength bars, warming from cyan (low) through violet and fuchsia to rose (urgent). */
 export function PriorityIcon({
   priority,
   className,
@@ -14,11 +21,7 @@ export function PriorityIcon({
       viewBox="0 0 16 16"
       role="img"
       aria-label={`${PRIORITY_LABEL[priority]} priority`}
-      className={cn(
-        "size-4 shrink-0",
-        priority === "urgent" ? "text-neon" : "text-brand-text",
-        className,
-      )}
+      className={cn("size-4 shrink-0", TONE[priority], className)}
     >
       {[0, 1, 2, 3].map((bar) => (
         <rect

@@ -4,7 +4,7 @@ export interface Toast {
   id: string;
   title: string;
   description?: string;
-  /** "success" uses the neon accent; everything else stays neutral. */
+  /** "success" uses the success colour; everything else stays on brand. */
   tone: "default" | "success";
 }
 
@@ -14,7 +14,8 @@ interface ToastState {
   dismiss: (id: string) => void;
 }
 
-const VISIBLE_MS = 4_500;
+/** How long a toast stays up (its countdown bar runs for the same time). */
+export const TOAST_VISIBLE_MS = 4_500;
 const MAX_TOASTS = 3;
 
 export const useToasts = create<ToastState>()((set, get) => ({
@@ -23,7 +24,7 @@ export const useToasts = create<ToastState>()((set, get) => ({
     const id = crypto.randomUUID();
     const next: Toast = { ...toast, id, tone: toast.tone ?? "default" };
     set((state) => ({ toasts: [...state.toasts, next].slice(-MAX_TOASTS) }));
-    setTimeout(() => get().dismiss(id), VISIBLE_MS);
+    setTimeout(() => get().dismiss(id), TOAST_VISIBLE_MS);
   },
   dismiss: (id) => set((state) => ({ toasts: state.toasts.filter((toast) => toast.id !== id) })),
 }));

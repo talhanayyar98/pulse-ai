@@ -27,15 +27,25 @@ export function SubtaskList({
     <div>
       {subtasks.length > 0 && (
         <div className="mb-3 flex items-center gap-3">
-          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/8">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/8">
             <motion.div
-              className={cn("h-full rounded-full", complete ? "bg-neon" : "bg-brand")}
+              className={cn(
+                "h-full rounded-full bg-linear-to-r transition-shadow duration-500",
+                complete
+                  ? "from-success to-info shadow-[0_0_12px_var(--color-success-glow)]"
+                  : "from-brand to-accent",
+              )}
               initial={false}
               animate={{ width: `${(done / subtasks.length) * 100}%` }}
               transition={springs.snappy}
             />
           </div>
-          <span className="font-mono text-xs text-fg-secondary">
+          <span
+            className={cn(
+              "font-mono text-xs transition-colors",
+              complete ? "text-success" : "text-fg-secondary",
+            )}
+          >
             {done}/{subtasks.length}
           </span>
         </div>
@@ -51,7 +61,7 @@ export function SubtaskList({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={springs.snappy}
-              className="group flex items-center gap-3 rounded-lg px-1 py-1.5 hover:bg-white/3"
+              className="group flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-white/4"
             >
               <Checkbox
                 checked={subtask.done}
@@ -76,7 +86,7 @@ export function SubtaskList({
                 type="button"
                 aria-label={`Delete subtask ${subtask.title}`}
                 onClick={() => onChange(subtasks.filter((item) => item.id !== subtask.id))}
-                className="rounded p-1 text-fg-muted opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
+                className="rounded p-1 text-fg-muted opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-danger/12 hover:text-danger focus-visible:opacity-100"
               >
                 <XIcon className="size-3.5" />
               </button>
@@ -86,8 +96,8 @@ export function SubtaskList({
       </ul>
 
       {subtasks.length < LIMITS.subtasks && (
-        <div className="mt-1 flex items-center gap-3 px-1 py-1.5">
-          <PlusIcon className="size-5 text-fg-muted" />
+        <div className="group mt-1 flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors focus-within:bg-white/3">
+          <PlusIcon className="size-5 text-fg-muted transition-[color,rotate] duration-300 ease-spring group-focus-within:rotate-90 group-focus-within:text-brand-text" />
           <input
             aria-label="Add subtask"
             placeholder="Add a subtask…"

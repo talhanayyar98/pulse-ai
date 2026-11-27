@@ -17,7 +17,7 @@ export default function AppLayout({ children }: Readonly<{ children: ReactNode }
       <div id="app-root" className="flex min-h-dvh">
         <a
           href="#main"
-          className="sr-only z-50 rounded-lg bg-neon px-3 py-2 font-medium text-on-neon focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+          className="sr-only z-50 rounded-lg bg-cta px-3 py-2 font-medium text-on-brand focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
         >
           Skip to content
         </a>
