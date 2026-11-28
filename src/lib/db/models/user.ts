@@ -1,4 +1,4 @@
-import { type Model, Schema, model, models } from "mongoose";
+import mongoose, { type Model, Schema, model } from "mongoose";
 import { type Settings, WEEK_START_DAYS } from "@/lib/domain/settings";
 
 export interface UserDoc {
@@ -42,4 +42,4 @@ const userSchema = new Schema<UserDoc>(
 userSchema.index({ "accounts.provider": 1, "accounts.providerAccountId": 1 }, { unique: true });
 
 export const UserModel: Model<UserDoc> =
-  (models.User as Model<UserDoc> | undefined) ?? model<UserDoc>("User", userSchema);
+  (mongoose.models.User as Model<UserDoc> | undefined) ?? model<UserDoc>("User", userSchema);

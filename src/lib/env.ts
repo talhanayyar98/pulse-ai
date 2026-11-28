@@ -22,4 +22,8 @@ export const env = {
     const subject = process.env.VAPID_SUBJECT;
     return publicKey && privateKey && subject ? { publicKey, privateKey, subject } : null;
   },
+  /** Shared secret of /api/cron/tick; the route doesn't exist without one. */
+  get cronSecret(): string | null {
+    return process.env.CRON_SECRET || null;
+  },
 };

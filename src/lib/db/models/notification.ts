@@ -1,4 +1,4 @@
-import { type Model, Schema, model, models } from "mongoose";
+import mongoose, { type Model, Schema, model } from "mongoose";
 
 /** A notification the server sent, kept for the notification centre. */
 export interface NotificationDoc {
@@ -28,5 +28,5 @@ const notificationSchema = new Schema<NotificationDoc>(
 notificationSchema.index({ userId: 1, createdAt: -1 });
 
 export const NotificationModel: Model<NotificationDoc> =
-  (models.Notification as Model<NotificationDoc> | undefined) ??
+  (mongoose.models.Notification as Model<NotificationDoc> | undefined) ??
   model<NotificationDoc>("Notification", notificationSchema);

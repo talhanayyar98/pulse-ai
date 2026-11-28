@@ -1,4 +1,4 @@
-import { type Model, Schema, model, models } from "mongoose";
+import mongoose, { type Model, Schema, model } from "mongoose";
 
 /**
  * pending → sending (claimed by a dispatcher, under a lease) → sent | skipped | failed.
@@ -56,5 +56,5 @@ reminderSchema.index({ state: 1, leaseUntil: 1 });
 reminderSchema.index({ taskId: 1, state: 1 });
 
 export const ReminderModel: Model<ReminderDoc> =
-  (models.Reminder as Model<ReminderDoc> | undefined) ??
+  (mongoose.models.Reminder as Model<ReminderDoc> | undefined) ??
   model<ReminderDoc>("Reminder", reminderSchema);

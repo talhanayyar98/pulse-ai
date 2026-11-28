@@ -1,4 +1,4 @@
-import { type Model, Schema, model, models } from "mongoose";
+import mongoose, { type Model, Schema, model } from "mongoose";
 import type { Recurrence } from "@/lib/domain/recurrence";
 import type { ReminderRule } from "@/lib/domain/reminders";
 import { HORIZONS, PRIORITIES, type Horizon, type Priority } from "@/lib/domain/task";
@@ -69,4 +69,4 @@ taskSchema.index({ userId: 1, dueAt: 1 });
 taskSchema.index({ dueAt: 1 });
 
 export const TaskModel: Model<TaskDoc> =
-  (models.Task as Model<TaskDoc> | undefined) ?? model<TaskDoc>("Task", taskSchema);
+  (mongoose.models.Task as Model<TaskDoc> | undefined) ?? model<TaskDoc>("Task", taskSchema);

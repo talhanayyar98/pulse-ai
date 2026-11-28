@@ -1,4 +1,4 @@
-import { type Model, Schema, model, models } from "mongoose";
+import mongoose, { type Model, Schema, model } from "mongoose";
 
 /** One browser (or installed app) that receives the user's pushes. */
 export interface PushSubscriptionDoc {
@@ -27,5 +27,5 @@ const pushSubscriptionSchema = new Schema<PushSubscriptionDoc>(
 pushSubscriptionSchema.index({ userId: 1 });
 
 export const PushSubscriptionModel: Model<PushSubscriptionDoc> =
-  (models.PushSubscription as Model<PushSubscriptionDoc> | undefined) ??
+  (mongoose.models.PushSubscription as Model<PushSubscriptionDoc> | undefined) ??
   model<PushSubscriptionDoc>("PushSubscription", pushSubscriptionSchema);

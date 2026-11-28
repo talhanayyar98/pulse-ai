@@ -10,6 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "worker": "node --env-file-if-exists=.env.local --import tsx src/worker/index.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
