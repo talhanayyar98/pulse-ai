@@ -195,3 +195,32 @@ export function ChevronRightIcon(props: IconProps) {
     </Icon>
   );
 }
+
+const CLOUD = "M7.5 18.5a4.5 4.5 0 0 1-.6-8.96 5.5 5.5 0 0 1 10.7 1.46 3.75 3.75 0 0 1-.35 7.5z";
+
+export function CloudCheckIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d={CLOUD} />
+      <path d="M9.75 14.25l1.75 1.75 3-3" />
+    </Icon>
+  );
+}
+
+export function CloudUpIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d={CLOUD} />
+      <path d="M12 16.25v-4.5M10 13.5l2-2 2 2" />
+    </Icon>
+  );
+}
+
+export function CloudOffIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d={CLOUD} />
+      <path d="M4 4l16 16" />
+    </Icon>
+  );
+}

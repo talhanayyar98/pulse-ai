@@ -8,6 +8,7 @@ import { AppBadgeSync } from "@/components/shell/OverdueBadge";
 import { NewTaskFab } from "@/components/shell/QuickActions";
 import { SessionGuard } from "@/components/shell/SessionGuard";
 import { Sidebar } from "@/components/shell/Sidebar";
+import { SyncNotices } from "@/components/shell/SyncNotices";
 import { TaskDrawer } from "@/components/task/TaskDrawer";
 import { Toaster } from "@/components/ui/Toaster";
 
@@ -33,6 +34,7 @@ export default function AppLayout({ children }: Readonly<{ children: ReactNode }
         <NewTaskFab />
       </div>
       <SessionGuard />
+      <SyncNotices />
       <AppBadgeSync />
       <GlobalShortcuts />
       <CommandPalette />

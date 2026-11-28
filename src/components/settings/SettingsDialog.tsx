@@ -7,6 +7,7 @@ import { Overlay } from "@/components/ui/Overlay";
 import { Segmented } from "@/components/ui/Segmented";
 import { useSaveSettings, useSettings } from "@/lib/client/settings";
 import { WEEK_START_DAYS, WEEK_START_LABEL } from "@/lib/domain/settings";
+import { useOnline } from "@/lib/hooks/use-online";
 import { useUi } from "@/lib/stores/ui";
 
 const WEEK_START_OPTIONS = WEEK_START_DAYS.map((day) => ({
@@ -29,6 +30,7 @@ export function SettingsDialog() {
 function SettingsBody({ onClose }: Readonly<{ onClose: () => void }>) {
   const settings = useSettings();
   const save = useSaveSettings();
+  const online = useOnline();
   const calendarId = useId();
 
   return (
@@ -39,6 +41,13 @@ function SettingsBody({ onClose }: Readonly<{ onClose: () => void }>) {
           <XIcon className="size-5 transition-transform duration-300 ease-spring group-hover:rotate-90" />
         </Button>
       </header>
+
+      {!online && (
+        <p className="mt-4 rounded-xl border border-progress/25 bg-progress-soft px-3.5 py-2.5 text-xs text-fg-secondary">
+          You&apos;re offline. Settings save to your account, so they can be changed once
+          you&apos;re back online.
+        </p>
+      )}
 
       <section aria-labelledby={calendarId} className="mt-6 border-t border-line pt-5">
         <h3 id={calendarId} className="text-lg leading-none">
@@ -55,6 +64,7 @@ function SettingsBody({ onClose }: Readonly<{ onClose: () => void }>) {
             label="Week starts on"
             value={String(settings.weekStartsOn)}
             options={WEEK_START_OPTIONS}
+            disabled={!online}
             onChange={(value) => {
               const weekStartsOn = WEEK_START_DAYS.find((day) => String(day) === value);
               if (weekStartsOn !== undefined) save({ ...settings, weekStartsOn });

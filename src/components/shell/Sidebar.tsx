@@ -10,6 +10,7 @@ import { Logo } from "./Logo";
 import { NAV_ITEMS, isActivePath } from "./nav";
 import { OverdueBadge } from "./OverdueBadge";
 import { SidebarQuickActions } from "./QuickActions";
+import { SyncStatus } from "./SyncStatus";
 import { UserMenu } from "./UserMenu";
 
 export function Sidebar() {
@@ -77,7 +78,10 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      <div className="mt-auto border-t border-nav-line pt-3">
+      <div className="mt-auto">
+        <SyncStatus />
+      </div>
+      <div className="border-t border-nav-line pt-3">
         <UserMenu />
       </div>
     </aside>
