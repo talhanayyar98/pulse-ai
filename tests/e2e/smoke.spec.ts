@@ -1,10 +1,17 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import { type BrowserContext, expect, type Locator, type Page, test } from "@playwright/test";
+import mongoose from "mongoose";
 import { OFFLINE_DB } from "@/lib/client/offline/idb";
+import { notificationsResponseSchema } from "@/lib/domain/notifications";
+import type { PushMessage } from "@/lib/domain/push";
+import { tasksResponseSchema } from "@/lib/domain/sync";
+import { E2E_CRON_SECRET, E2E_MONGODB_URI } from "./env";
 
-test("sign in, capture and edit a task, plan the week and month, install and work offline", async ({
+test("sign in, capture and edit a task, plan the week and month, get reminded, work offline", async ({
   page,
   context,
 }) => {
+  // One long journey through the whole app: well past the default 30 seconds.
+  test.setTimeout(120_000);
   const column = (name: string) => page.getByRole("region", { name });
   const syncStatus = page.getByRole("group", { name: "Sync status" });
   /** What a person checks before closing the tab: the sidebar says the server has everything. */
@@ -272,6 +279,11 @@ test("sign in, capture and edit a task, plan the week and month, install and wor
     await expect(callTheBank(tray)).toBeHidden();
 
     await today.getByRole("button", { name: /^Add a task on/ }).click();
+    // Typed before quick add has focus, the "n" of "cleaning" would open a fresh, undated one.
+    await expect(page.getByRole("combobox", { name: "New task" })).toHaveAttribute(
+      "placeholder",
+      `What needs doing on ${dayName(inDays(0))}?`,
+    );
     await page.keyboard.type("Pick up the dry cleaning");
     await page.keyboard.press("Enter");
     await expect(today.getByRole("button", { name: /Pick up the dry cleaning/ })).toBeVisible();
@@ -398,6 +410,118 @@ test("sign in, capture and edit a task, plan the week and month, install and wor
     await expect
       .poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null))
       .toBe(true);
+  });
+
+  await test.step("a task's reminders: the default, plus one more, scheduled on the server", async () => {
+    await column("In Progress")
+      .getByRole("button", { name: /Buy oat milk/ })
+      .click();
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    const before = drawer.getByRole("group", { name: "Remind me before it's due" });
+    await expect(before.getByRole("button", { name: "1 hour before" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(drawer).toContainText("Your default reminders");
+    await before.getByRole("button", { name: "1 day before" }).click();
+    await expect(before.getByRole("button", { name: "1 day before" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(drawer).toContainText(/Next reminder: .+ and 1 more/);
+    await expect(drawer.getByRole("button", { name: "Use my defaults" })).toBeVisible();
+    // No VAPID keys in this environment: reminders reach the app only.
+    await expect(drawer).toContainText("This server doesn't send notifications");
+    await page.keyboard.press("Escape");
+    await synced();
+
+    const taskId = await taskIdOf(page, "Buy oat milk");
+    await expect.poll(() => pendingReminders(taskId)).toBe(2);
+  });
+
+  await test.step("a due reminder arrives: push, toast, and the bell", async () => {
+    await context.grantPermissions(["notifications"]);
+    // Another device adds a reminder two seconds from now (minutes are the UI's finest step).
+    const taskId = await taskIdOf(page, "Buy oat milk");
+    const { tasks } = tasksResponseSchema.parse(
+      await (await page.request.get("/api/tasks")).json(),
+    );
+    const task = tasks.find((candidate) => candidate.id === taskId);
+    if (!task?.reminders) throw new Error("Buy oat milk should have its own reminders by now");
+    const soon = {
+      id: crypto.randomUUID(),
+      kind: "absolute",
+      at: new Date(Date.now() + 2_000).toISOString(),
+    } as const;
+    const put = await page.request.post("/api/sync", {
+      data: {
+        ops: [
+          {
+            opId: crypto.randomUUID(),
+            type: "task.put",
+            task: {
+              ...task,
+              reminders: [...task.reminders, soon],
+              updatedAt: new Date().toISOString(),
+            },
+          },
+        ],
+      },
+    });
+    expect(put.ok()).toBe(true);
+
+    // What the worker does every 20 seconds.
+    const tick = async () => {
+      const response = await page.request.get("/api/cron/tick", {
+        headers: { Authorization: `Bearer ${E2E_CRON_SECRET}` },
+      });
+      return ((await response.json()) as { reminders: { sent: number } }).reminders.sent;
+    };
+    await expect.poll(tick, { timeout: 10_000 }).toBe(1);
+    const { notifications } = notificationsResponseSchema.parse(
+      await (await page.request.get("/api/notifications")).json(),
+    );
+    const [sent] = notifications;
+    expect(sent).toMatchObject({ taskId, title: "Buy oat milk" });
+    if (!sent) throw new Error("The reminder should be in the notification history");
+
+    await deliverPush(context, page, {
+      kind: "reminder",
+      notificationId: sent.id,
+      taskId,
+      title: sent.title,
+      body: sent.body,
+      url: `/board?task=${taskId}`,
+    });
+    const toast = page.getByRole("status").filter({ hasText: "Reminder: Buy oat milk" });
+    await expect(toast).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          const registration = await navigator.serviceWorker.ready;
+          return (await registration.getNotifications()).map(({ title, tag }) => ({ title, tag }));
+        }),
+      )
+      .toEqual([{ title: "Buy oat milk", tag: sent.id }]);
+
+    await toast.getByRole("button", { name: "Open" }).click();
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    await expect(drawer.getByRole("textbox", { name: "Title" })).toHaveValue("Buy oat milk");
+    await page.keyboard.press("Escape");
+
+    await page.getByRole("button", { name: /^Notifications/ }).click();
+    const panel = page.getByRole("dialog", { name: "Notifications" });
+    await expect(panel.getByRole("button", { name: /Reminder: Buy oat milk/ })).toBeVisible();
+    await page.keyboard.press("Escape");
+  });
+
+  await test.step("a notification's link opens its task", async () => {
+    const taskId = await taskIdOf(page, "Buy oat milk");
+    await page.goto(`/board?task=${encodeURIComponent(taskId)}`);
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    await expect(drawer.getByRole("textbox", { name: "Title" })).toHaveValue("Buy oat milk");
+    await expect(page).toHaveURL(/\/board$/);
+    await page.keyboard.press("Escape");
   });
 
   await test.step("offline, the board shows the last-synced tasks", async () => {
@@ -528,6 +652,46 @@ async function dragWithMouse(
   const endY = position === "top" ? to.y + 4 : to.y + to.height / 2;
   await page.mouse.move(to.x + to.width / 2, endY, { steps: 20 });
   await page.mouse.up();
+}
+
+/** The id of the signed-in user's task with this title, as the server has it. */
+async function taskIdOf(page: Page, title: string): Promise<string> {
+  const { tasks } = tasksResponseSchema.parse(await (await page.request.get("/api/tasks")).json());
+  const task = tasks.find((candidate) => candidate.title === title);
+  if (!task) throw new Error(`No task called “${title}”`);
+  return task.id;
+}
+
+/** Reminders the server has scheduled for the task and not sent yet. */
+async function pendingReminders(taskId: string): Promise<number> {
+  const connection = await mongoose.createConnection(E2E_MONGODB_URI).asPromise();
+  try {
+    return await connection.collection("reminders").countDocuments({ taskId, state: "pending" });
+  } finally {
+    await connection.close();
+  }
+}
+
+/** Hands the service worker a push message, as a push service would (Chrome DevTools Protocol). */
+async function deliverPush(
+  context: BrowserContext,
+  page: Page,
+  message: PushMessage,
+): Promise<void> {
+  const cdp = await context.newCDPSession(page);
+  const registrationId = new Promise<string>((resolve) => {
+    cdp.on("ServiceWorker.workerRegistrationUpdated", ({ registrations }) => {
+      const live = registrations.find((registration) => !registration.isDeleted);
+      if (live) resolve(live.registrationId);
+    });
+  });
+  await cdp.send("ServiceWorker.enable");
+  await cdp.send("ServiceWorker.deliverPushMessage", {
+    origin: new URL(page.url()).origin,
+    registrationId: await registrationId,
+    data: JSON.stringify(message),
+  });
+  await cdp.detach();
 }
 
 /** Task snapshots waiting in the app's IndexedDB outbox for the server to confirm them. */
