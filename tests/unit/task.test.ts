@@ -39,6 +39,11 @@ describe("createTask", () => {
     });
   });
 
+  it("takes a due date from the draft (quick add on a calendar day)", () => {
+    const due = { dueAt: "2026-12-07T00:00:00.000Z", allDay: true };
+    expect(makeTask({ due })).toMatchObject(due);
+  });
+
   it("rejects an empty title", () => {
     expect(() => makeTask({ title: "   " })).toThrow();
   });

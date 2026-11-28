@@ -90,6 +90,7 @@ export interface TaskDraft {
   status?: TaskStatus;
   priority?: Priority;
   labels?: readonly string[];
+  due?: Pick<Task, "dueAt" | "allDay">;
 }
 
 /** Trims, collapses whitespace and removes case-insensitive duplicates, keeping first spelling. */
@@ -129,8 +130,8 @@ export function createTask(
     priority: draft.priority ?? "medium",
     labels: normalizeLabels(draft.labels ?? []),
     order: context.order,
-    dueAt: null,
-    allDay: false,
+    dueAt: draft.due?.dueAt ?? null,
+    allDay: draft.due?.allDay ?? false,
     horizon: "none",
     recurrence: null,
     subtasks: [],

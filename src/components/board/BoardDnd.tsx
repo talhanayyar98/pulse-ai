@@ -25,11 +25,10 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { TaskCard } from "@/components/task/TaskCard";
+import { BodyPortal } from "@/components/ui/BodyPortal";
 import { orderAtIndex, type Task } from "@/lib/domain/task";
 import { TASK_STATUS_LABEL, TASK_STATUSES, type TaskStatus } from "@/lib/domain/task-status";
-import { useIsClient } from "@/lib/hooks/use-is-client";
 import { springs } from "@/lib/motion";
 import { BoardColumn, COLUMN_DROP_PREFIX } from "./BoardColumn";
 import { SortableTaskCard } from "./SortableTaskCard";
@@ -290,7 +289,7 @@ export function BoardDnd({ columns, loading, onMove, renderEmpty, renderFooter }
           );
         })}
       </div>
-      <DragPortal>
+      <BodyPortal>
         <DragOverlay dropAnimation={dropAnimation}>
           {activeTask && (
             <motion.div
@@ -302,15 +301,9 @@ export function BoardDnd({ columns, loading, onMove, renderEmpty, renderFooter }
             </motion.div>
           )}
         </DragOverlay>
-      </DragPortal>
+      </BodyPortal>
     </DndContext>
   );
-}
-
-/** The overlay lives in <body> so no scrolling or transformed ancestor can clip it. */
-function DragPortal({ children }: Readonly<{ children: ReactNode }>) {
-  const isClient = useIsClient();
-  return isClient ? createPortal(children, document.body) : null;
 }
 
 function CardSkeletons() {
