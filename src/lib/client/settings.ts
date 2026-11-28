@@ -7,16 +7,19 @@ import { api } from "./api";
 import { settingsKey } from "./query-keys";
 import { useSession } from "./session";
 
-/** The user's settings; the defaults until they load (or when signed out). */
-export function useSettings(): Settings {
+export function useSettingsQuery() {
   const session = useSession();
-  const { data } = useQuery({
+  return useQuery({
     queryKey: settingsKey,
     queryFn: api.getSettings,
     enabled: Boolean(session.data),
     staleTime: 5 * 60_000,
   });
-  return data ?? DEFAULT_SETTINGS;
+}
+
+/** The user's settings; the defaults until they load (or when signed out). */
+export function useSettings(): Settings {
+  return useSettingsQuery().data ?? DEFAULT_SETTINGS;
 }
 
 export function useWeekStartsOn(): WeekStartsOn {

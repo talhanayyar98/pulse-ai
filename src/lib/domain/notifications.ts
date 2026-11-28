@@ -1,12 +1,31 @@
 import { addDays } from "date-fns";
+import { z } from "zod";
 import { deadline, DUE_SOON_MS, isDueSoon, isOverdue } from "./filters";
 import type { Task } from "./task";
+import { taskIdSchema } from "./task-id";
 
 /**
- * Notifications are derived from the tasks themselves (no server feed yet): each one exists
- * while its condition holds and disappears when the task changes (rescheduled, moved, done).
+ * Most notifications are derived from the tasks themselves: each one exists while its
+ * condition holds and disappears when the task changes (rescheduled, moved, done). Reminders
+ * are the exception: the server sends them and keeps each one as history.
  */
-export type NotificationKind = "overdue" | "due_soon" | "stuck" | "completed";
+export type NotificationKind = "overdue" | "due_soon" | "stuck" | "completed" | "reminder";
+
+/** A notification the server sent, kept as history (GET /api/notifications). */
+export const sentNotificationSchema = z.object({
+  id: z.string(),
+  kind: z.literal("reminder"),
+  taskId: taskIdSchema,
+  title: z.string(),
+  body: z.string(),
+  createdAt: z.iso.datetime(),
+});
+export type SentNotification = z.infer<typeof sentNotificationSchema>;
+
+export const notificationsResponseSchema = z.object({
+  notifications: z.array(sentNotificationSchema),
+});
+export type NotificationsResponse = z.infer<typeof notificationsResponseSchema>;
 
 export interface TaskNotification {
   /** Stable while the condition holds; a reschedule or new status change yields a new id. */
@@ -28,9 +47,29 @@ function notification(kind: NotificationKind, task: Task, at: Date, ref: Date): 
   return { id: `${kind}:${task.id}:${ref.toISOString()}`, kind, task, at, ref };
 }
 
-/** Newest first. */
-export function deriveNotifications(tasks: readonly Task[], now: Date): TaskNotification[] {
+/**
+ * Newest first. Sent reminders are listed while their task exists, showing it as it is now;
+ * `ref` is its deadline, or the moment it was sent for an undated task.
+ */
+export function deriveNotifications(
+  tasks: readonly Task[],
+  now: Date,
+  sent: readonly SentNotification[] = [],
+): TaskNotification[] {
   const notifications: TaskNotification[] = [];
+  const live = new Map(tasks.filter((task) => !task.deletedAt).map((task) => [task.id, task]));
+  for (const reminder of sent) {
+    const task = live.get(reminder.taskId);
+    const at = new Date(reminder.createdAt);
+    if (task)
+      notifications.push({
+        id: reminder.id,
+        kind: "reminder",
+        task,
+        at,
+        ref: deadline(task) ?? at,
+      });
+  }
 
   for (const task of tasks) {
     if (task.deletedAt) continue;

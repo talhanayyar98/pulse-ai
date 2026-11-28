@@ -1,4 +1,4 @@
-import { type Model, Schema, model, models } from "mongoose";
+import mongoose, { type Model, Schema, model } from "mongoose";
 import type { ActivityEvent, ActivityType } from "@/lib/domain/activity";
 
 export interface ActivityEventDoc {
@@ -7,6 +7,8 @@ export interface ActivityEventDoc {
   type: ActivityType;
   payload: ActivityEvent["payload"];
   at: Date;
+  /** Set on events that must be logged only once, e.g. `overdue:<task id>:<due date>`. */
+  key?: string;
 }
 
 const activityEventSchema = new Schema<ActivityEventDoc>(
@@ -16,13 +18,18 @@ const activityEventSchema = new Schema<ActivityEventDoc>(
     type: { type: String, required: true },
     payload: { type: Schema.Types.Mixed, default: {} },
     at: { type: Date, required: true },
+    key: { type: String },
   },
   { versionKey: false, collection: "activity_events" },
 );
 
 activityEventSchema.index({ userId: 1, at: -1 });
 activityEventSchema.index({ taskId: 1, at: -1 });
+activityEventSchema.index(
+  { key: 1 },
+  { unique: true, partialFilterExpression: { key: { $type: "string" } } },
+);
 
 export const ActivityEventModel: Model<ActivityEventDoc> =
-  (models.ActivityEvent as Model<ActivityEventDoc> | undefined) ??
+  (mongoose.models.ActivityEvent as Model<ActivityEventDoc> | undefined) ??
   model<ActivityEventDoc>("ActivityEvent", activityEventSchema);

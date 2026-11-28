@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { notificationsResponseSchema, type SentNotification } from "@/lib/domain/notifications";
+import { pushConfigSchema, type PushSubscriptionJson } from "@/lib/domain/push";
 import { type Settings, settingsBodySchema } from "@/lib/domain/settings";
 import {
   type SyncResponse,
@@ -20,7 +22,7 @@ export class ApiError extends Error {
 
 const errorBodySchema = z.object({ error: z.string() });
 
-async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit): Promise<T> {
+async function send(path: string, init?: RequestInit): Promise<Response> {
   const response = await fetch(path, {
     ...init,
     headers: {
@@ -32,6 +34,11 @@ async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit
     const body = errorBodySchema.safeParse(await response.json().catch(() => null));
     throw new ApiError(response.status, body.success ? body.data.error : response.statusText);
   }
+  return response;
+}
+
+async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit): Promise<T> {
+  const response = await send(path, init);
   // Responses cross a trust boundary (and may come from an older deploy): validate them.
   return schema.parse(await response.json());
 }
@@ -75,5 +82,25 @@ export const api = {
       body: JSON.stringify({ settings }),
     });
     return body.settings;
+  },
+
+  async listNotifications(): Promise<SentNotification[]> {
+    return (await request("/api/notifications", notificationsResponseSchema)).notifications;
+  },
+
+  /** The VAPID public key to subscribe with; null when the server sends no pushes. */
+  async pushPublicKey(): Promise<string | null> {
+    return (await request("/api/push", pushConfigSchema)).publicKey;
+  },
+
+  async savePushSubscription(subscription: PushSubscriptionJson): Promise<void> {
+    await send("/api/push/subscriptions", {
+      method: "POST",
+      body: JSON.stringify({ subscription }),
+    });
+  },
+
+  async deletePushSubscription(endpoint: string): Promise<void> {
+    await send("/api/push/subscriptions", { method: "DELETE", body: JSON.stringify({ endpoint }) });
   },
 };

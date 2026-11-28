@@ -15,7 +15,9 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // Full Chromium in its new headless mode: the default headless shell refuses notification
+  // permission, which the reminder steps need.
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], channel: "chromium" } }],
   // The service worker only runs in production builds, so the smoke test needs one.
   // Requires MongoDB on 127.0.0.1:27017 (see README → Local setup).
   webServer: {

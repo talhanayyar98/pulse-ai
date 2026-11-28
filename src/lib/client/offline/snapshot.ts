@@ -1,8 +1,9 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { sessionSchema } from "@/lib/client/api";
-import { sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
-import { settingsSchema } from "@/lib/domain/settings";
+import { notificationsKey, sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
+import { sentNotificationSchema } from "@/lib/domain/notifications";
+import { readSettings } from "@/lib/domain/settings";
 import { taskSchema } from "@/lib/domain/task";
 
 /** Bump when a saved shape changes incompatibly; snapshots of other versions are ignored. */
@@ -12,7 +13,10 @@ const SNAPSHOT_VERSION = 1;
 const PERSISTED_QUERIES = [
   { queryKey: sessionKey, schema: sessionSchema },
   { queryKey: tasksKey, schema: z.array(taskSchema) },
-  { queryKey: settingsKey, schema: settingsSchema },
+  // Settings saved before a field existed keep what they have; the rest read as defaults.
+  { queryKey: settingsKey, schema: z.unknown().transform(readSettings) },
+  // Reminders already sent, so the notification centre has its history offline.
+  { queryKey: notificationsKey, schema: z.array(sentNotificationSchema) },
 ] as const;
 
 const PERSISTED_NAMES: ReadonlySet<unknown> = new Set(

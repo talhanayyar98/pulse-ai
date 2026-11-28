@@ -22,6 +22,7 @@ import { useUi } from "@/lib/stores/ui";
 import { DescriptionField } from "./fields/DescriptionField";
 import { DueField } from "./fields/DueField";
 import { LabelsField } from "./fields/LabelsField";
+import { RemindersField } from "./fields/RemindersField";
 import { RepeatField } from "./fields/RepeatField";
 import { SubtaskList } from "./fields/SubtaskList";
 import { TitleField } from "./fields/TitleField";
@@ -151,6 +152,11 @@ function TaskDetails({
           <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1">Repeat</dt>
           <dd>
             <RepeatField task={task} onChange={update} />
+          </dd>
+
+          <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1.5">Remind</dt>
+          <dd>
+            <RemindersField task={task} onChange={update} />
           </dd>
 
           <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1">Labels</dt>

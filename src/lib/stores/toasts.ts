@@ -6,6 +6,8 @@ export interface Toast {
   description?: string;
   /** "success" uses the success colour; everything else stays on brand. */
   tone: "default" | "success";
+  /** A button on the toast, e.g. "Open" on a reminder; clicking it also dismisses the toast. */
+  action?: { label: string; onClick: () => void };
 }
 
 interface ToastState {

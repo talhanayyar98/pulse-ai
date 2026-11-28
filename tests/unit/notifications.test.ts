@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { deriveNotifications, STUCK_AFTER_DAYS } from "@/lib/domain/notifications";
+import {
+  deriveNotifications,
+  type SentNotification,
+  STUCK_AFTER_DAYS,
+} from "@/lib/domain/notifications";
 import { createTask, type Task } from "@/lib/domain/task";
 import { formatAgo } from "@/lib/time-ago";
 
@@ -68,6 +72,35 @@ describe("deriveNotifications", () => {
     const [before] = deriveNotifications([base], now);
     const [after] = deriveNotifications([{ ...base, dueAt: "2026-12-02T10:00:00.000Z" }], now);
     expect(before?.id).not.toBe(after?.id);
+  });
+});
+
+describe("sent reminders", () => {
+  const sent = (taskId: string, createdAt: string): SentNotification => ({
+    id: `reminder:${taskId}|rule|${createdAt}`,
+    kind: "reminder",
+    taskId,
+    title: "Old title",
+    body: "Due Today 12:00",
+    createdAt,
+  });
+
+  it("are listed with the task as it is now, in time order with the rest", () => {
+    const due = task({ title: "Renamed", dueAt: "2026-12-02T13:00:00.000Z" });
+    const result = deriveNotifications([due], now, [sent(due.id, "2026-12-02T11:00:00.000Z")]);
+    // The reminder was sent at 11:00 today; "due soon" began at 13:00 yesterday.
+    expect(result.map((n) => [n.kind, n.task.title])).toEqual([
+      ["reminder", "Renamed"],
+      ["due_soon", "Renamed"],
+    ]);
+    expect(result[0]?.ref).toEqual(new Date("2026-12-02T13:00:00.000Z"));
+  });
+
+  it("are dropped once their task is deleted", () => {
+    const gone = task({ deletedAt: now.toISOString() });
+    expect(deriveNotifications([gone], now, [sent(gone.id, "2026-12-02T10:30:00.000Z")])).toEqual(
+      [],
+    );
   });
 });
 

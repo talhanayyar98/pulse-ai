@@ -93,6 +93,20 @@ describe("recurrence", () => {
     expect(taskSchema.safeParse(task).success).toBe(false);
   });
 
+  it("reads a snapshot from before reminders existed as using the default reminders", () => {
+    const { reminders: _omitted, ...legacy } = makeTask();
+    expect(taskSchema.parse(legacy).reminders).toBeNull();
+  });
+
+  it("allows at most five reminders, each with its own id", () => {
+    const rule = () => ({ id: crypto.randomUUID(), kind: "offset", amount: 1, unit: "days" });
+    expect(taskSchema.safeParse({ ...makeTask(), reminders: [rule(), rule()] }).success).toBe(true);
+    const six = Array.from({ length: 6 }, rule);
+    expect(taskSchema.safeParse({ ...makeTask(), reminders: six }).success).toBe(false);
+    const twin = rule();
+    expect(taskSchema.safeParse({ ...makeTask(), reminders: [twin, twin] }).success).toBe(false);
+  });
+
   it("reads a snapshot from before recurrence existed as not repeating", () => {
     const { recurrence: _omitted, ...legacy } = makeTask();
     expect(taskSchema.parse(legacy).recurrence).toBeNull();

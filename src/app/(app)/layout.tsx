@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { CommandPalette } from "@/components/command/CommandPalette";
+import { PushPrompt } from "@/components/notifications/PushPrompt";
+import { PushSync } from "@/components/notifications/PushSync";
+import { ReminderNotices } from "@/components/notifications/ReminderNotices";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";
+import { TimeZoneSync } from "@/components/settings/TimeZoneSync";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { GlobalShortcuts } from "@/components/shell/GlobalShortcuts";
 import { MobileTopBar } from "@/components/shell/MobileTopBar";
@@ -35,11 +39,15 @@ export default function AppLayout({ children }: Readonly<{ children: ReactNode }
       </div>
       <SessionGuard />
       <SyncNotices />
+      <ReminderNotices />
+      <PushSync />
+      <TimeZoneSync />
       <AppBadgeSync />
       <GlobalShortcuts />
       <CommandPalette />
       <TaskDrawer />
       <SettingsDialog />
+      <PushPrompt />
       <Toaster />
     </>
   );

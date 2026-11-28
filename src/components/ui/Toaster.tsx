@@ -59,6 +59,18 @@ export function Toaster() {
                   <p className="mt-0.5 text-xs text-fg-secondary">{toast.description}</p>
                 )}
               </div>
+              {toast.action && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.action?.onClick();
+                    dismiss(toast.id);
+                  }}
+                  className="-my-0.5 shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-info transition-colors hover:bg-info/8"
+                >
+                  {toast.action.label}
+                </button>
+              )}
               <button
                 type="button"
                 aria-label="Dismiss"

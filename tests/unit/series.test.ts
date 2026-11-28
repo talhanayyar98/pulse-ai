@@ -49,6 +49,23 @@ describe("nextOccurrenceTask", () => {
     expect(next?.subtasks.map((subtask) => subtask.done)).toEqual([false]);
   });
 
+  it("moves reminders at a fixed moment along with the occurrence", () => {
+    const offset = { id: crypto.randomUUID(), kind: "offset", amount: 1, unit: "hours" } as const;
+    const evening = {
+      id: crypto.randomUUID(),
+      kind: "absolute",
+      at: local(11, 29, 20).toISOString(),
+    } as const;
+    const task = recurring(everyMonday, local(11, 30, 9), { reminders: [offset, evening] });
+    expect(nextOccurrenceTask(task, context)?.reminders).toEqual([
+      offset,
+      { ...evening, at: local(12, 6, 20).toISOString() },
+    ]);
+    expect(
+      nextOccurrenceTask(recurring(everyMonday, local(11, 30, 9)), context)?.reminders,
+    ).toBeNull();
+  });
+
   it("keeps later occurrences in the first task's series", () => {
     const first = recurring(everyMonday, local(11, 30, 9));
     const second = nextOccurrenceTask(first, context);

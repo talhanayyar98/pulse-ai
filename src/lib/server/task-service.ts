@@ -2,8 +2,11 @@ import { connectDb } from "@/lib/db/connect";
 import { ActivityEventModel } from "@/lib/db/models/activity-event";
 import { TaskModel } from "@/lib/db/models/task";
 import { deriveActivity } from "@/lib/domain/activity";
+import { affectsReminders } from "@/lib/domain/reminders";
 import type { Task } from "@/lib/domain/task";
 import { HttpError, isDuplicateKeyError } from "./errors";
+import { scheduleTaskReminders } from "./reminders";
+import { reminderPolicyFor } from "./settings";
 import { toTask, toTaskDoc } from "./task-mapper";
 
 export async function listTasks(userId: string): Promise<Task[]> {
@@ -22,8 +25,8 @@ const MAX_ATTEMPTS = 5;
 
 /**
  * Stores a full task snapshot if it is newer than what the server has (last-write-wins on
- * updatedAt). Every task write goes through here, so activity logging (and, in later
- * milestones, reminder recalculation) cannot be skipped.
+ * updatedAt). Every task write goes through here, so activity logging and reminder
+ * scheduling cannot be skipped.
  */
 export async function putTask(
   userId: string,
@@ -66,6 +69,12 @@ export async function putTask(
       await ActivityEventModel.insertMany(
         events.map((event) => ({ ...event, userId, taskId: next.id, at: now })),
       );
+    }
+    if (affectsReminders(existing, next)) {
+      await scheduleTaskReminders(userId, next, await reminderPolicyFor(userId), {
+        changedAt: new Date(next.updatedAt),
+        now,
+      });
     }
     return { status: "applied", task: next };
   }

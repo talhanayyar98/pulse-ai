@@ -1,7 +1,7 @@
 import { onlineManager, type QueryCacheNotifyEvent, type QueryClient } from "@tanstack/react-query";
 import { api, sessionSchema } from "@/lib/client/api";
 import { usePendingTasks } from "@/lib/client/pending";
-import { sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
+import { notificationsKey, sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
 import { type Task, taskSchema } from "@/lib/domain/task";
 import { useToasts } from "@/lib/stores/toasts";
 import { createIdbStorage } from "./idb";
@@ -71,8 +71,9 @@ export function createOfflineClient(
   function forgetPreviousUser(): void {
     usePendingTasks.getState().clear();
     storage.clear().catch(reportStorageError);
-    void queryClient.resetQueries({ queryKey: tasksKey });
-    void queryClient.resetQueries({ queryKey: settingsKey });
+    for (const queryKey of [tasksKey, settingsKey, notificationsKey]) {
+      void queryClient.resetQueries({ queryKey });
+    }
   }
 
   function confirmSession(userId: string | null): void {

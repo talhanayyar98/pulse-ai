@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { connectDb } from "@/lib/db/connect";
 import { UserModel } from "@/lib/db/models/user";
-import { DEFAULT_SETTINGS } from "@/lib/domain/settings";
+import { DEFAULT_SETTINGS, type Settings } from "@/lib/domain/settings";
 import { HttpError } from "@/lib/server/errors";
 import { getSettings, saveSettings } from "@/lib/server/settings";
 import { upsertUserForAccount } from "@/lib/server/users";
@@ -35,13 +35,24 @@ describe("settings", () => {
     await expect(getSettings(userId)).resolves.toEqual(DEFAULT_SETTINGS);
   });
 
-  it("stores a saved week start and returns it on the next read", async () => {
-    await expect(saveSettings(userId, { weekStartsOn: 0 })).resolves.toEqual({ weekStartsOn: 0 });
-    await expect(getSettings(userId)).resolves.toEqual({ weekStartsOn: 0 });
+  it("stores saved settings and returns them on the next read", async () => {
+    const settings: Settings = {
+      weekStartsOn: 0,
+      timeZone: "America/New_York",
+      defaultReminders: [{ id: crypto.randomUUID(), kind: "offset", amount: 1, unit: "days" }],
+      allDayReminderTime: "08:30",
+    };
+    await expect(saveSettings(userId, settings)).resolves.toEqual(settings);
+    await expect(getSettings(userId)).resolves.toEqual(settings);
+  });
+
+  it("keeps an emptied list of default reminders empty", async () => {
+    await saveSettings(userId, { ...DEFAULT_SETTINGS, defaultReminders: [] });
+    await expect(getSettings(userId)).resolves.toMatchObject({ defaultReminders: [] });
   });
 
   it("keeps settings when the user signs in again", async () => {
-    await saveSettings(userId, { weekStartsOn: 6 });
+    await saveSettings(userId, { ...DEFAULT_SETTINGS, weekStartsOn: 6 });
     await upsertUserForAccount({
       provider: "google",
       providerAccountId: "42",
@@ -49,7 +60,7 @@ describe("settings", () => {
       name: "Grace Hopper",
       image: null,
     });
-    await expect(getSettings(userId)).resolves.toEqual({ weekStartsOn: 6 });
+    await expect(getSettings(userId)).resolves.toEqual({ ...DEFAULT_SETTINGS, weekStartsOn: 6 });
   });
 
   it("answers 404 for an unknown user", async () => {

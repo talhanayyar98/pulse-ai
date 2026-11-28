@@ -1,5 +1,6 @@
-import { endOfDay } from "date-fns";
+import { addDays, differenceInCalendarDays, endOfDay } from "date-fns";
 import { nextOccurrence } from "./recurrence";
+import type { ReminderRule } from "./reminders";
 import type { WeekStartsOn } from "./settings";
 import { type Task, taskSchema } from "./task";
 import { occurrenceId, seriesIdOf } from "./task-id";
@@ -29,6 +30,24 @@ export function* upcomingOccurrences(
 }
 
 /**
+ * Reminders at a fixed moment move with the occurrence: "the evening before" stays the evening
+ * before. Offsets from the deadline follow it by themselves.
+ */
+function shiftReminders(
+  rules: readonly ReminderRule[] | null,
+  from: Date,
+  to: Date,
+): ReminderRule[] | null {
+  if (rules === null) return null;
+  const days = differenceInCalendarDays(to, from);
+  return rules.map((rule) =>
+    rule.kind === "absolute"
+      ? { ...rule, at: addDays(new Date(rule.at), days).toISOString() }
+      : rule,
+  );
+}
+
+/**
  * The task that follows `task` once it is completed: same details, unticked subtasks,
  * back in To Do, due on the series' next date. Null for a task that doesn't repeat.
  */
@@ -37,7 +56,7 @@ export function nextOccurrenceTask(
   context: { now: Date; order: string; weekStartsOn: WeekStartsOn },
 ): Task | null {
   const next = upcomingOccurrences(task, context.now, context.weekStartsOn).next();
-  if (next.done) return null;
+  if (next.done || !task.dueAt) return null;
   const createdAt = context.now.toISOString();
   return taskSchema.parse({
     ...task,
@@ -45,6 +64,7 @@ export function nextOccurrenceTask(
     status: "todo",
     order: context.order,
     dueAt: next.value.toISOString(),
+    reminders: shiftReminders(task.reminders, new Date(task.dueAt), next.value),
     subtasks: task.subtasks.map((subtask) => ({ ...subtask, done: false })),
     statusChangedAt: createdAt,
     completedAt: null,

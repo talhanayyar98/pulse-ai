@@ -5,6 +5,7 @@ import { SettingsIcon, SignOutIcon } from "@/components/ui/icons";
 import { signOutUser } from "@/lib/auth-actions";
 import { cn } from "@/lib/cn";
 import { useOfflineClient } from "@/lib/client/offline/context";
+import { usePush } from "@/lib/client/push";
 import { useSession } from "@/lib/client/session";
 import { useOnline } from "@/lib/hooks/use-online";
 import { useNotificationState } from "@/lib/stores/notifications";
@@ -40,6 +41,11 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
       return;
     }
     useNotificationState.getState().clear();
+    // This device must stop receiving the user's reminders once they've signed out.
+    await usePush
+      .getState()
+      .disable()
+      .catch(() => undefined);
     try {
       await signOutUser();
     } catch {
