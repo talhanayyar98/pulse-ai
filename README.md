@@ -82,12 +82,37 @@ In quick add, `#label` adds a label and `!low` / `!med` / `!high` / `!urgent` se
 - **Overdue** cards get a pulsing rose edge, and the count appears next to the Board title, on the Board nav item and, when the app is installed, on its Dock icon. Tasks due within 24 hours show their date in amber.
 - **Notifications** (the bell, top of the sidebar or mobile top bar): overdue tasks, tasks due within 24 hours, tasks in progress for 7+ days, and tasks finished in the last 24 hours. They are worked out on the device from your tasks. The red count shows what arrived since you last opened the panel; opening it clears the count, and items stay highlighted until you open them or **Mark all as read**. Seen/read state is kept per device and cleared on sign-out.
 
+## Planning the week and month
+
+| Action                 | Mouse / trackpad                                              | Touch                                                       | Keyboard                                                                  |
+| ---------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Give a task a day      | Drag it from **Unscheduled** (Week) onto a day                | Long-press, then drag                                       | `Space` to lift, arrows to choose a day, `Space` to drop, `Esc` to cancel |
+| Move it to another day | Drag it (Week or Month)                                       | Long-press, then drag                                       | As above; in Month `←` `→` move a day and `↑` `↓` a week                  |
+| Clear its date         | Drag it back onto **Unscheduled** (Week)                      | Long-press, then drag                                       | As above                                                                  |
+| Add a task on a day    | **+** on the day (Week), or click a day's empty space (Month) | **+** on the day (Week), or tap a day, then **Add** (Month) | `Tab` to the day's add button, `Enter`                                    |
+| Change week or month   | **‹** / **Today** / **›** above the days                      | Same                                                        | Same                                                                      |
+
+- Weeks start on the day you choose in **Settings** (the sliders icon by your avatar, or search "Settings" with `⌘K`): Monday, Sunday or Saturday. It's saved to your account, so every device agrees, and the board's "This week" filter follows it.
+- Dropping a timed task keeps its time of day; an all-day or undated task becomes due all day.
+- **Unscheduled** lists open tasks without a date: planned for this week first, then this month, then the rest.
+- Week and Month keep your place when you switch between them. In Month, **+N more** on a busy day opens that week.
+
+### Repeating tasks
+
+- In the task drawer, **Repeat** sets a task to repeat weekly on chosen weekdays or monthly on chosen days of the month, every 1 to 12 weeks or months. A day past the end of a shorter month (say the 31st) falls on its last day.
+- A repeat needs a due date: choosing one for an undated task makes it due today, and clearing the date ends the repeat.
+- A repeating task has one real task at a time. Completing it (in the drawer, or by dragging it to Done) adds the next one to To Do with its subtasks unticked. If you complete it late, the next one is scheduled from today rather than in the past. Reopening the completed task takes that next one back, as long as you haven't changed it.
+- Upcoming repeats appear as dashed chips in Week and Month; clicking one opens the current task.
+- Dates are worked out in your local time, so "Mondays 09:00" stays at 09:00 when the clocks change.
+
 ## How data flows
 
 - **Reads:** `GET /api/tasks` returns the signed-in user's tasks. View pages are static shells, so the data always loads in the browser (this is what lets the app shell work offline).
 - **Writes:** every change sends the full task to `POST /api/sync`. The server keeps whichever version has the newer `updatedAt` (last-write-wins), so replaying a write is harmless. Deletes are soft (`deletedAt`), so other devices learn about them.
 - **Optimistic UI:** the screen shows server data plus your unsaved edits (`src/lib/client/pending.ts`), so changes appear instantly and fast successive edits never overwrite each other.
 - **Ordering:** each task has a fractional order key (`src/lib/domain/ordering.ts`). A drop writes one new key between its neighbours, so moving a card never renumbers a column.
+- **Repeating tasks:** the next occurrence of a series gets the id `<series id>:<yyyy-MM-dd>` (the series id is the first task's id). Two devices that complete the same occurrence therefore write the same task, settled by last-write-wins, instead of creating two. Upcoming occurrences are worked out on the device and never stored (`src/lib/domain/series.ts`).
+- **Settings:** `GET` / `PUT /api/settings` read and replace the user's preferences, stored on their user document. A setting the user never saved reads as its default.
 - **One write path on the server:** `putTask` in `src/lib/server/task-service.ts` enforces ownership and last-write-wins, and logs activity events (`activity_events`: created, moved, completed, reopened, rescheduled, updated, deleted) for the Phase 2 nudges.
 
 ## Design tokens

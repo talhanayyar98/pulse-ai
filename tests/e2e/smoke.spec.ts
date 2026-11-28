@@ -1,12 +1,17 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
-test("sign in, capture and edit a task, install and work offline", async ({ page, context }) => {
+test("sign in, capture and edit a task, plan the week and month, install and work offline", async ({
+  page,
+  context,
+}) => {
   const column = (name: string) => page.getByRole("region", { name });
   const savesSettled = trackSaves(page);
 
   await test.step("signed-out visitors are sent to sign in", async () => {
     await page.goto("/");
-    await expect(page).toHaveURL(/\/signin$/);
+    // The guard waits for the session check, and a server that has just started can take
+    // several seconds to answer its first request.
+    await expect(page).toHaveURL(/\/signin$/, { timeout: 15_000 });
   });
 
   await test.step("dev sign-in opens the board with all four columns", async () => {
@@ -247,6 +252,130 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await expect(panel).toBeHidden();
   });
 
+  await test.step("week planner: drag an unscheduled task onto today, add one on a day", async () => {
+    await page
+      .getByRole("navigation", { name: "Views" })
+      .getByRole("link", { name: "Week" })
+      .click();
+    const tray = page.getByRole("region", { name: "Unscheduled" });
+    const today = page.getByRole("region", { name: `${dayName(inDays(0))}, today` });
+    const callTheBank = (where: Locator) => where.getByRole("button", { name: /Call the bank/ });
+
+    await dragWithMouse(page, callTheBank(tray), today, "center");
+    await expect(callTheBank(today)).toBeVisible();
+    await expect(callTheBank(tray)).toBeHidden();
+
+    await today.getByRole("button", { name: /^Add a task on/ }).click();
+    await page.keyboard.type("Pick up the dry cleaning");
+    await page.keyboard.press("Enter");
+    await expect(today.getByRole("button", { name: /Pick up the dry cleaning/ })).toBeVisible();
+  });
+
+  await test.step("a weekly repeat shows what's coming; completing it schedules the next", async () => {
+    const today = page.getByRole("region", { name: `${dayName(inDays(0))}, today` });
+    const inAWeek = page.getByRole("region", { name: dayName(inDays(7)) });
+    const dryCleaning = (where: Locator) =>
+      where.getByRole("button", { name: /Pick up the dry cleaning/ });
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    const status = drawer.getByRole("combobox", { name: "Status" });
+    const nextWeek = page.getByRole("button", { name: "Next week" });
+    const thisWeek = page.getByRole("button", { name: "Today" });
+
+    await dryCleaning(today).click();
+    await drawer.getByRole("radio", { name: "Weekly" }).click();
+    await expect(drawer.getByRole("button", { name: weekdayOf(inDays(0)) })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(drawer).toContainText(`Next one: ${shortDay(inDays(7))}`);
+    await page.keyboard.press("Escape");
+
+    // Next week shows a projected occurrence, not a real task yet.
+    await nextWeek.click();
+    await expect(dryCleaning(inAWeek)).toHaveAccessibleName(/^Upcoming: /);
+    await thisWeek.click();
+
+    await dryCleaning(today).click();
+    await status.selectOption("done");
+    await expect(page.getByRole("status").filter({ hasText: "Next one:" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await nextWeek.click();
+    await expect(dryCleaning(inAWeek)).toHaveAttribute("aria-roledescription", "draggable task");
+    await thisWeek.click();
+
+    // Reopening takes the untouched next occurrence back.
+    await dryCleaning(today).click();
+    await status.selectOption("todo");
+    await page.keyboard.press("Escape");
+    await nextWeek.click();
+    await expect(dryCleaning(inAWeek)).toHaveAccessibleName(/^Upcoming: /);
+    await thisWeek.click();
+  });
+
+  await test.step("month calendar: click a day to add a task, drag it to reschedule", async () => {
+    await page
+      .getByRole("navigation", { name: "Views" })
+      .getByRole("link", { name: "Month" })
+      .click();
+    // Two days of this month that aren't today, so they hold at most a repeat besides our task.
+    const now = new Date();
+    const [first, second] = [10, 11].includes(now.getDate()) ? [20, 21] : [10, 11];
+    const dayOfMonth = (date: number) =>
+      page.getByRole("group", {
+        name: dayName(new Date(now.getFullYear(), now.getMonth(), date)),
+        exact: true,
+      });
+    const from = dayOfMonth(first);
+    const to = dayOfMonth(second);
+    const books = (where: Locator) =>
+      where.getByRole("button", { name: /Return the library books/ });
+
+    const box = await from.boundingBox();
+    if (!box) throw new Error("Day is not visible");
+    await from.click({ position: { x: box.width / 2, y: box.height - 8 } });
+    await expect(page.getByRole("combobox", { name: "New task" })).toHaveAttribute(
+      "placeholder",
+      `What needs doing on ${dayName(new Date(now.getFullYear(), now.getMonth(), first))}?`,
+    );
+    await page.keyboard.type("Return the library books");
+    await page.keyboard.press("Enter");
+    await expect(books(from)).toBeVisible();
+
+    await dragWithMouse(page, books(from), to, "center");
+    await expect(books(to)).toBeVisible();
+    await savesSettled();
+    await page.reload();
+    await expect(books(to)).toBeVisible();
+    await expect(books(from)).toBeHidden();
+  });
+
+  await test.step("the week can start on Sunday, on every device", async () => {
+    await page.getByRole("button", { name: "Settings" }).click();
+    const dialog = page.getByRole("dialog", { name: "Settings" });
+    const saved = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/settings") && response.request().method() === "PUT",
+    );
+    await dialog.getByRole("radio", { name: "Sunday" }).click();
+    await saved;
+    await page.keyboard.press("Escape");
+
+    await page
+      .getByRole("navigation", { name: "Views" })
+      .getByRole("link", { name: "Week" })
+      .click();
+    const firstDay = page.getByRole("main").getByRole("region").nth(1);
+    await expect(firstDay).toHaveAccessibleName(/^Sunday /);
+    await page.reload();
+    await expect(firstDay).toHaveAccessibleName(/^Sunday /);
+
+    await page
+      .getByRole("navigation", { name: "Views" })
+      .getByRole("link", { name: "Board" })
+      .click();
+    await expect(page).toHaveURL(/\/board$/);
+  });
+
   await test.step("manifest is linked and served", async () => {
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(href).toBeTruthy();
@@ -281,6 +410,42 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     await context.setOffline(false);
   });
 });
+
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/** Local midnight, `days` from today (calendar arithmetic, so daylight saving can't shift it). */
+function inDays(days: number): Date {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate() + days);
+}
+
+function weekdayOf(date: Date): string {
+  return WEEKDAYS[date.getDay()] ?? "";
+}
+
+/** "Saturday 28 November": how the calendars name a day. */
+function dayName(date: Date): string {
+  return `${weekdayOf(date)} ${date.getDate()} ${MONTHS[date.getMonth()] ?? ""}`;
+}
+
+/** "Sat 5 Dec": how the repeat preview writes a date. */
+function shortDay(date: Date): string {
+  return `${weekdayOf(date).slice(0, 3)} ${date.getDate()} ${(MONTHS[date.getMonth()] ?? "").slice(0, 3)}`;
+}
 
 /** Drags like a person: press, nudge past the activation distance, glide, release. */
 async function dragWithMouse(
