@@ -7,6 +7,7 @@ import {
   orderAtIndex,
   orderAtTopOf,
   type Task,
+  taskSchema,
 } from "@/lib/domain/task";
 
 const T0 = new Date("2026-12-01T09:00:00.000Z");
@@ -65,6 +66,42 @@ describe("applyTaskPatch", () => {
     const first = applyTaskPatch(makeTask(), { title: "One" }, T1);
     const second = applyTaskPatch(first, { title: "Two" }, T1);
     expect(Date.parse(second.updatedAt)).toBeGreaterThan(Date.parse(first.updatedAt));
+  });
+});
+
+describe("recurrence", () => {
+  const everyMonday = { freq: "weekly", interval: 1, byWeekday: [1] } as const;
+  const repeating = () =>
+    applyTaskPatch(
+      makeTask(),
+      { dueAt: "2026-12-07T09:00:00.000Z", recurrence: { ...everyMonday, byWeekday: [1] } },
+      T1,
+    );
+
+  it("ends the repeat when the due date is cleared", () => {
+    const cleared = applyTaskPatch(repeating(), { dueAt: null, allDay: false }, T1);
+    expect(cleared.recurrence).toBeNull();
+  });
+
+  it("refuses a repeating task without a due date", () => {
+    const task = { ...repeating(), dueAt: null };
+    expect(taskSchema.safeParse(task).success).toBe(false);
+  });
+
+  it("reads a snapshot from before recurrence existed as not repeating", () => {
+    const { recurrence: _omitted, ...legacy } = makeTask();
+    expect(taskSchema.parse(legacy).recurrence).toBeNull();
+  });
+});
+
+describe("task ids", () => {
+  it("accepts random UUIDs and occurrence ids, nothing else", () => {
+    const id = crypto.randomUUID();
+    const valid = (candidate: string) => taskSchema.safeParse({ ...makeTask(), id: candidate });
+    expect(valid(id).success).toBe(true);
+    expect(valid(`${id}:2026-12-07`).success).toBe(true);
+    expect(valid(`${id}:next-week`).success).toBe(false);
+    expect(valid("task-1").success).toBe(false);
   });
 });
 

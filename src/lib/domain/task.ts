@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { compareOrder, isValidOrderKey, keyBetweenNeighbours } from "./ordering";
+import { recurrenceSchema } from "./recurrence";
+import { taskIdSchema } from "./task-id";
 import { TASK_STATUSES, type TaskStatus } from "./task-status";
 
 export const PRIORITIES = ["low", "medium", "high", "urgent"] as const;
@@ -36,27 +38,34 @@ export const subtaskSchema = z.object({
 });
 export type Subtask = z.infer<typeof subtaskSchema>;
 
-export const taskSchema = z.object({
-  id: z.uuid(),
-  title: z.string().trim().min(1).max(LIMITS.title),
-  description: z.string().max(LIMITS.description),
-  status: z.enum(TASK_STATUSES),
-  priority: z.enum(PRIORITIES),
-  labels: z.array(z.string().trim().min(1).max(LIMITS.label)).max(LIMITS.labels),
-  order: z.string().refine(isValidOrderKey, "Invalid order key"),
-  dueAt: timestamp.nullable(),
-  /** True when the task is due on a day rather than at a time; dueAt is local midnight. */
-  allDay: z.boolean(),
-  horizon: z.enum(HORIZONS),
-  subtasks: z.array(subtaskSchema).max(LIMITS.subtasks),
-  statusChangedAt: timestamp,
-  completedAt: timestamp.nullable(),
-  createdAt: timestamp,
-  /** Last-write-wins clock: the newest updatedAt is kept when edits conflict. */
-  updatedAt: timestamp,
-  /** Soft delete, so other devices learn about deletions when they sync. */
-  deletedAt: timestamp.nullable(),
-});
+export const taskSchema = z
+  .object({
+    id: taskIdSchema,
+    title: z.string().trim().min(1).max(LIMITS.title),
+    description: z.string().max(LIMITS.description),
+    status: z.enum(TASK_STATUSES),
+    priority: z.enum(PRIORITIES),
+    labels: z.array(z.string().trim().min(1).max(LIMITS.label)).max(LIMITS.labels),
+    order: z.string().refine(isValidOrderKey, "Invalid order key"),
+    dueAt: timestamp.nullable(),
+    /** True when the task is due on a day rather than at a time; dueAt is local midnight. */
+    allDay: z.boolean(),
+    horizon: z.enum(HORIZONS),
+    /** Defaults to null so snapshots from clients older than recurrence stay valid. */
+    recurrence: recurrenceSchema.nullable().default(null),
+    subtasks: z.array(subtaskSchema).max(LIMITS.subtasks),
+    statusChangedAt: timestamp,
+    completedAt: timestamp.nullable(),
+    createdAt: timestamp,
+    /** Last-write-wins clock: the newest updatedAt is kept when edits conflict. */
+    updatedAt: timestamp,
+    /** Soft delete, so other devices learn about deletions when they sync. */
+    deletedAt: timestamp.nullable(),
+  })
+  .refine((task) => task.recurrence === null || task.dueAt !== null, {
+    message: "A repeating task needs a due date",
+    path: ["recurrence"],
+  });
 export type Task = z.infer<typeof taskSchema>;
 
 export type TaskPatch = Partial<
@@ -71,6 +80,7 @@ export type TaskPatch = Partial<
     | "dueAt"
     | "allDay"
     | "horizon"
+    | "recurrence"
     | "subtasks"
   >
 >;
@@ -122,6 +132,7 @@ export function createTask(
     dueAt: null,
     allDay: false,
     horizon: "none",
+    recurrence: null,
     subtasks: [],
     statusChangedAt: createdAt,
     completedAt: status === "done" ? createdAt : null,
@@ -142,6 +153,8 @@ export function applyTaskPatch(task: Task, patch: TaskPatch, now: Date): Task {
     next.statusChangedAt = now.toISOString();
     next.completedAt = patch.status === "done" ? now.toISOString() : null;
   }
+  // A series is anchored on its due date: clearing the date ends the repeat.
+  if (next.dueAt === null) next.recurrence = null;
   return taskSchema.parse(next);
 }
 

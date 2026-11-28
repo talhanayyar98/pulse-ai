@@ -44,6 +44,18 @@ describe("deriveActivity", () => {
     ]);
   });
 
+  it("logs a change of repeat as an update", () => {
+    const due = applyTaskPatch(base, { dueAt: "2026-12-07T09:00:00.000Z" }, later);
+    const repeating = applyTaskPatch(
+      due,
+      { recurrence: { freq: "monthly", interval: 1, byMonthDay: [7] } },
+      later,
+    );
+    expect(deriveActivity(due, repeating)).toEqual([
+      { type: "updated", payload: { fields: ["recurrence"] } },
+    ]);
+  });
+
   it("ignores pure reordering", () => {
     expect(deriveActivity(base, applyTaskPatch(base, { order: "a1" }, later))).toEqual([]);
   });

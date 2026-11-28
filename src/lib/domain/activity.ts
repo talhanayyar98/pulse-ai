@@ -22,6 +22,7 @@ const UPDATABLE_FIELDS = [
   "priority",
   "labels",
   "horizon",
+  "recurrence",
   "subtasks",
 ] as const satisfies readonly (keyof Task)[];
 type UpdatableField = (typeof UPDATABLE_FIELDS)[number];

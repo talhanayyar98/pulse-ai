@@ -1,4 +1,5 @@
 import { type Model, Schema, model, models } from "mongoose";
+import type { Recurrence } from "@/lib/domain/recurrence";
 import { HORIZONS, PRIORITIES, type Horizon, type Priority } from "@/lib/domain/task";
 import { TASK_STATUSES, type TaskStatus } from "@/lib/domain/task-status";
 
@@ -14,6 +15,8 @@ export interface TaskDoc {
   dueAt: Date | null;
   allDay: boolean;
   horizon: Horizon;
+  /** Absent on tasks stored before recurrence existed. */
+  recurrence?: Recurrence | null;
   subtasks: Array<{ id: string; title: string; done: boolean }>;
   statusChangedAt: Date;
   completedAt: Date | null;
@@ -35,6 +38,8 @@ const taskSchema = new Schema<TaskDoc>(
     dueAt: { type: Date, default: null },
     allDay: { type: Boolean, default: false },
     horizon: { type: String, enum: HORIZONS, required: true },
+    // Validated by recurrenceSchema at the API boundary; stored as sent.
+    recurrence: { type: Schema.Types.Mixed, default: null },
     subtasks: [
       {
         _id: false,
