@@ -1,11 +1,17 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { OFFLINE_DB } from "@/lib/client/offline/idb";
 
 test("sign in, capture and edit a task, plan the week and month, install and work offline", async ({
   page,
   context,
 }) => {
   const column = (name: string) => page.getByRole("region", { name });
-  const savesSettled = trackSaves(page);
+  const syncStatus = page.getByRole("group", { name: "Sync status" });
+  /** What a person checks before closing the tab: the sidebar says the server has everything. */
+  const synced = async () => {
+    await expect(syncStatus).toHaveText("All changes synced");
+    await expect.poll(() => outboxSize(page)).toBe(0);
+  };
 
   await test.step("signed-out visitors are sent to sign in", async () => {
     await page.goto("/");
@@ -50,7 +56,7 @@ test("sign in, capture and edit a task, plan the week and month, install and wor
   });
 
   await test.step("the task survives a reload", async () => {
-    await savesSettled();
+    await synced();
     await page.reload();
     await expect(column("To Do").getByRole("button", { name: /Buy oat milk/ })).toBeVisible();
   });
@@ -141,7 +147,7 @@ test("sign in, capture and edit a task, plan the week and month, install and wor
   });
 
   await test.step("every move survives a reload", async () => {
-    await savesSettled();
+    await synced();
     await page.reload();
     await expect(
       column("In Progress").getByRole("button", { name: /Call the bank/ }),
@@ -343,7 +349,7 @@ test("sign in, capture and edit a task, plan the week and month, install and wor
 
     await dragWithMouse(page, books(from), to, "center");
     await expect(books(to)).toBeVisible();
-    await savesSettled();
+    await synced();
     await page.reload();
     await expect(books(to)).toBeVisible();
     await expect(books(from)).toBeHidden();
@@ -394,17 +400,74 @@ test("sign in, capture and edit a task, plan the week and month, install and wor
       .toBe(true);
   });
 
-  await test.step("views open offline, including ones never visited", async () => {
+  await test.step("offline, the board shows the last-synced tasks", async () => {
     await context.setOffline(true);
     await page.reload();
     await expect(page.getByRole("heading", { level: 1, name: "Board" })).toBeVisible();
+    await expect(
+      column("In Progress").getByRole("button", { name: /Call the bank/ }),
+    ).toBeVisible();
+    await expect(column("Done").getByRole("button", { name: /Water the plants/ })).toBeVisible();
+    await expect(syncStatus).toContainText("Offline");
+  });
 
+  await test.step("edits made offline wait on the device, even across a reload", async () => {
+    await page.keyboard.press("n");
+    await page.keyboard.type("Renew the passport #admin");
+    await page.keyboard.press("Enter");
+    const passport = (where: Locator) => where.getByRole("button", { name: /Renew the passport/ });
+    await expect(passport(column("To Do"))).toBeVisible();
+
+    await column("To Do")
+      .getByRole("button", { name: /Pay the electricity bill/ })
+      .click();
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    await drawer.getByRole("combobox", { name: "Status" }).selectOption("done");
+    await page.keyboard.press("Escape");
+    const bill = (where: Locator) =>
+      where.getByRole("button", { name: /Pay the electricity bill/ });
+    await expect(bill(column("Done"))).toBeVisible();
+
+    await expect(syncStatus).toContainText("2 tasks to sync");
+    await expect.poll(() => outboxSize(page)).toBe(2);
+    await page.reload();
+    await expect(passport(column("To Do"))).toBeVisible();
+    await expect(bill(column("Done"))).toBeVisible();
+    await expect(syncStatus).toContainText("2 tasks to sync");
+  });
+
+  await test.step("the other views open offline too", async () => {
     await page
       .getByRole("navigation", { name: "Views" })
       .getByRole("link", { name: "Month" })
       .click();
     await expect(page.getByRole("heading", { level: 1, name: "Month" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Return the library books/ })).toBeVisible();
+    await page
+      .getByRole("navigation", { name: "Views" })
+      .getByRole("link", { name: "Board" })
+      .click();
+  });
 
+  await test.step("back online, the waiting edits sync without a reload", async () => {
+    await context.setOffline(false);
+    await expect(
+      page.getByRole("status").filter({ hasText: "Synced your edits to 2 tasks." }),
+    ).toBeVisible();
+    await synced();
+
+    const response = await page.request.get("/api/tasks");
+    const { tasks } = (await response.json()) as { tasks: { title: string; status: string }[] };
+    expect(tasks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ title: "Renew the passport", status: "todo" }),
+        expect.objectContaining({ title: "Pay the electricity bill", status: "done" }),
+      ]),
+    );
+  });
+
+  await test.step("a page that was never cached shows the offline page", async () => {
+    await context.setOffline(true);
     await page.goto("/not-cached-anywhere");
     await expect(page.getByRole("heading", { name: "You're offline" })).toBeVisible();
     await context.setOffline(false);
@@ -467,20 +530,26 @@ async function dragWithMouse(
   await page.mouse.up();
 }
 
-/**
- * Edits save in the background. M5 adds an IndexedDB outbox that survives reloads; until
- * then, wait for in-flight saves before reloading, as a person would see them finish.
- */
-function trackSaves(page: Page): () => Promise<void> {
-  let inFlight = 0;
-  const isSave = (url: string) => url.endsWith("/api/sync");
-  page.on("request", (request) => {
-    if (isSave(request.url())) inFlight++;
-  });
-  const settle = (request: { url(): string }) => {
-    if (isSave(request.url())) inFlight--;
-  };
-  page.on("requestfinished", settle);
-  page.on("requestfailed", settle);
-  return () => expect.poll(() => inFlight).toBe(0);
+/** Task snapshots waiting in the app's IndexedDB outbox for the server to confirm them. */
+function outboxSize(page: Page): Promise<number> {
+  return page.evaluate(async (name) => {
+    // Opening a database that doesn't exist would create it empty; leave that to the app.
+    if (!(await indexedDB.databases()).some((db) => db.name === name)) return -1;
+    return new Promise<number>((resolve, reject) => {
+      const open = indexedDB.open(name);
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const count = db.transaction("outbox").objectStore("outbox").count();
+        count.onsuccess = () => {
+          db.close();
+          resolve(count.result);
+        };
+        count.onerror = () => {
+          db.close();
+          reject(count.error);
+        };
+      };
+    });
+  }, OFFLINE_DB.name);
 }

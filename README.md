@@ -105,11 +105,36 @@ In quick add, `#label` adds a label and `!low` / `!med` / `!high` / `!urgent` se
 - Upcoming repeats appear as dashed chips in Week and Month; clicking one opens the current task.
 - Dates are worked out in your local time, so "Mondays 09:00" stays at 09:00 when the clocks change.
 
+## Working offline
+
+Pulse keeps your tasks on the device, so the installed app opens and works without a connection.
+
+- **What's kept:** the tasks, settings and session from your last sync, in IndexedDB. Views open with them straight away and refresh as soon as there's a connection.
+- **Editing offline:** adding, editing, moving, completing and deleting all work. Each change shows at once and waits in an outbox on the device. It survives reloads and closing the app, and syncs by itself when the connection returns, without a reload.
+- **Sync status** sits at the bottom of the sidebar. On phones, an icon appears in the top bar while something is waiting.
+
+  | It says                   | Meaning                                                                                                                                                              |
+  | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | All changes synced        | The server has everything                                                                                                                                            |
+  | Syncing 2 tasks…          | Edits are on their way                                                                                                                                               |
+  | Offline · 2 tasks to sync | No connection; the edits wait on this device                                                                                                                         |
+  | Can't reach Pulse · Retry | Online, but the server didn't answer. Pulse retries after 1 s, 2 s, 4 s … (at most 30 s apart), and at once when you click **Retry**, return to the app or reconnect |
+  | Signed out                | The session ended; sign in again and the waiting edits sync                                                                                                          |
+
+  Toasts announce going offline, trouble reaching the server, and the recovery ("Synced your edits to 2 tasks.").
+
+- **Conflicts:** the newest edit of a task wins (last-write-wins on the time of the edit). If the same task was changed elsewhere after your offline edit, that version is kept and a toast tells you. Edits to different tasks never conflict.
+- **Needs a connection:** changing settings (they're saved to your account) and signing out. Signing out first syncs any waiting edits, then removes your data from the device; if the edits can't be synced, you stay signed in.
+- **Another account on the same browser:** the previous account's data and unsynced edits are discarded, never shown or sent as the new user's.
+- **Several tabs:** each tab syncs its own edits. Edits left in a tab that was closed while offline sync the next time Pulse opens.
+
 ## How data flows
 
 - **Reads:** `GET /api/tasks` returns the signed-in user's tasks. View pages are static shells, so the data always loads in the browser (this is what lets the app shell work offline).
-- **Writes:** every change sends the full task to `POST /api/sync`. The server keeps whichever version has the newer `updatedAt` (last-write-wins), so replaying a write is harmless. Deletes are soft (`deletedAt`), so other devices learn about them.
-- **Optimistic UI:** the screen shows server data plus your unsaved edits (`src/lib/client/pending.ts`), so changes appear instantly and fast successive edits never overwrite each other.
+- **Writes:** every change goes into the outbox (`src/lib/client/pending.ts`), then to `POST /api/sync` as full task snapshots, up to 100 per request (`src/lib/client/offline/sync-engine.ts`). The server keeps whichever version has the newer `updatedAt` (last-write-wins), so replaying a write is harmless. Deletes are soft (`deletedAt`), so other devices learn about them.
+- **Optimistic UI:** the screen shows server data plus the outbox, so changes appear instantly and fast successive edits never overwrite each other. Several edits to one task while offline are sent as one snapshot.
+- **On the device** (`src/lib/client/offline/`): an IndexedDB database named `pulse` holds a snapshot of the session, tasks and settings (`kv`) and one queued snapshot per edited task (`outbox`). A synced edit leaves the outbox only once a snapshot with the server's copy has been saved, so a reload always finds it in one or the other. The snapshot records whose data it is; if a different account signs in, both are cleared. Restored data is shown at once and refetched whenever there's a connection.
+- **Service worker:** it precaches the app shell but never caches `/api` responses: a second copy there would survive sign-out and could be older than the app's own.
 - **Ordering:** each task has a fractional order key (`src/lib/domain/ordering.ts`). A drop writes one new key between its neighbours, so moving a card never renumbers a column.
 - **Repeating tasks:** the next occurrence of a series gets the id `<series id>:<yyyy-MM-dd>` (the series id is the first task's id). Two devices that complete the same occurrence therefore write the same task, settled by last-write-wins, instead of creating two. Upcoming occurrences are worked out on the device and never stored (`src/lib/domain/series.ts`).
 - **Settings:** `GET` / `PUT /api/settings` read and replace the user's preferences, stored on their user document. A setting the user never saved reads as its default.
@@ -150,4 +175,4 @@ In Chrome DevTools → **Application** → **Manifest**, the **Installability** 
 
 ### Reset the app during development
 
-DevTools → **Application** → **Storage** → **Clear site data** removes the service worker and its caches. To uninstall, open the installed app's **⋮** menu → **Uninstall Pulse** (Chrome) or drag it from `~/Applications` to the Trash (Safari).
+DevTools → **Application** → **Storage** → **Clear site data** removes the service worker, its caches and the offline data in IndexedDB (including edits that haven't synced). To look at the offline data instead, open **Application** → **IndexedDB** → **pulse**. To uninstall, open the installed app's **⋮** menu → **Uninstall Pulse** (Chrome) or drag it from `~/Applications` to the Trash (Safari).
