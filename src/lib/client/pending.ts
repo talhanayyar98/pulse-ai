@@ -2,18 +2,20 @@ import { create } from "zustand";
 import type { Task } from "@/lib/domain/task";
 
 /**
- * Local edits not yet acknowledged by the server, newest snapshot per task.
+ * Local edits the server hasn't confirmed yet, newest snapshot per task: the outbox.
  *
- * What the UI renders is always "server cache + pending edits", and the pending store updates
+ * What the UI renders is always "server cache + pending edits", and this store updates
  * synchronously. So the very next keystroke already sees the previous edit, and quick
  * successive edits (two subtasks in a row) can never be built on stale data and overwrite
- * each other. M5 persists this as the offline outbox.
+ * each other. The offline client mirrors it to IndexedDB and replays it to the server.
  */
 interface PendingState {
   byId: Readonly<Record<string, Task>>;
   put: (task: Task) => void;
-  /** Called when `task`'s save finishes; keeps any newer edit made in the meantime. */
+  /** Called when the server has answered for `task`; keeps any newer edit made in the meantime. */
   settle: (task: Task) => void;
+  /** Adds edits saved by an earlier visit, unless this page already holds a newer one. */
+  restore: (tasks: readonly Task[]) => void;
   clear: () => void;
 }
 
@@ -25,6 +27,17 @@ export const usePendingTasks = create<PendingState>()((set) => ({
       if (state.byId[task.id] !== task) return state;
       const { [task.id]: _settled, ...rest } = state.byId;
       return { byId: rest };
+    }),
+  restore: (tasks) =>
+    set((state) => {
+      const byId = { ...state.byId };
+      for (const task of tasks) {
+        const current = byId[task.id];
+        if (!current || Date.parse(task.updatedAt) > Date.parse(current.updatedAt)) {
+          byId[task.id] = task;
+        }
+      }
+      return { byId };
     }),
   clear: () => set({ byId: {} }),
 }));

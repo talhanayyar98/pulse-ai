@@ -10,6 +10,7 @@ export async function signInAsDevUser(): Promise<void> {
   await signIn(DEV_PROVIDER_ID, { redirectTo: "/board" });
 }
 
+/** Ends the session without redirecting: the client reloads into /signin once it has cleaned up. */
 export async function signOutUser(): Promise<void> {
-  await signOut({ redirectTo: "/signin" });
+  await signOut({ redirect: false });
 }

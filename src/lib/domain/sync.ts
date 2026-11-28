@@ -4,7 +4,7 @@ import { taskSchema } from "./task";
 /**
  * Every write is a full task snapshot ("put"); a delete is a put with deletedAt set.
  * The server keeps whichever snapshot has the newer updatedAt, which makes replaying
- * the same op twice harmless (needed for the offline outbox in M5).
+ * the same op twice harmless: the offline outbox resends whatever it isn't sure arrived.
  */
 export const taskPutOpSchema = z.object({
   opId: z.uuid(),

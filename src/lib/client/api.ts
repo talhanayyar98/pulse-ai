@@ -36,7 +36,7 @@ async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit
   return schema.parse(await response.json());
 }
 
-const sessionSchema = z.object({
+export const sessionSchema = z.object({
   user: z.object({
     id: z.string(),
     name: z.string().nullish(),

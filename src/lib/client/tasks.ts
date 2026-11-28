@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createdByCompletion, nextOccurrenceTask } from "@/lib/domain/series";
 import {
@@ -16,12 +16,15 @@ import { formatOccurrence } from "@/lib/recurrence-label";
 import { useToasts } from "@/lib/stores/toasts";
 import { api } from "./api";
 import { usePendingTasks, withPending } from "./pending";
+import { tasksKey } from "./query-keys";
 import { useSession } from "./session";
 import { cachedSettings } from "./settings";
 
-export const tasksKey = ["tasks"] as const;
-
-/** Tasks as the user should see them: server state plus their unsaved edits, minus deletions. */
+/**
+ * Tasks as the user should see them: server state plus their unsaved edits, minus deletions.
+ * `isError` means there is nothing to show: a failed refetch over saved data (offline, say)
+ * keeps showing that data, and the sync indicator says why it may be out of date.
+ */
 export function useTasks() {
   const session = useSession();
   const query = useQuery({
@@ -35,38 +38,21 @@ export function useTasks() {
       query.data ? withPending(query.data, pending).filter((task) => !task.deletedAt) : undefined,
     [query.data, pending],
   );
-  return { data, isPending: query.isPending, isError: query.isError, refetch: query.refetch };
+  return {
+    data,
+    isPending: query.isPending,
+    isError: query.isError && query.data === undefined,
+    refetch: query.refetch,
+  };
 }
 
-/** Takes the server's copy unless the cache already holds a newer version. */
-function adoptServerCopy(tasks: Task[] | undefined, serverTask: Task): Task[] {
-  const cached = tasks?.find((task) => task.id === serverTask.id);
-  if (cached && Date.parse(cached.updatedAt) > Date.parse(serverTask.updatedAt)) {
-    return tasks ?? [];
-  }
-  return [...(tasks ?? []).filter((task) => task.id !== serverTask.id), serverTask];
-}
-
+/**
+ * Edits land in the outbox (the pending store) synchronously; the offline client saves them on
+ * this device and sends them to the server whenever it can.
+ */
 export function useTaskActions() {
   const queryClient = useQueryClient();
   const pushToast = useToasts((state) => state.push);
-
-  const { mutate: save } = useMutation({
-    mutationFn: (task: Task) => api.sync([{ opId: crypto.randomUUID(), type: "task.put", task }]),
-    onSuccess: ({ results }) => {
-      for (const { task } of results) {
-        queryClient.setQueryData<Task[]>(tasksKey, (tasks) => adoptServerCopy(tasks, task));
-      }
-    },
-    onError: () => {
-      pushToast({
-        title: "Couldn't save that change",
-        description: "Showing the last saved version instead.",
-      });
-      void queryClient.invalidateQueries({ queryKey: tasksKey });
-    },
-    onSettled: (_data, _error, task) => usePendingTasks.getState().settle(task),
-  });
 
   return useMemo(() => {
     const current = () =>
@@ -75,15 +61,7 @@ export function useTaskActions() {
         usePendingTasks.getState().byId,
       );
     const find = (id: string) => current().find((task) => task.id === id && !task.deletedAt);
-    const commit = (task: Task) => {
-      // A refetch already in flight predates this edit; drop it so it can't land afterwards
-      // and briefly show the old version once the edit is acknowledged. (Never cancel the
-      // first load: there would be nothing to fall back to.)
-      if (queryClient.getQueryData(tasksKey))
-        void queryClient.cancelQueries({ queryKey: tasksKey });
-      usePendingTasks.getState().put(task);
-      save(task);
-    };
+    const commit = (task: Task) => usePendingTasks.getState().put(task);
 
     /**
      * Completing a repeating task creates its next occurrence; reopening it takes back that
@@ -140,5 +118,5 @@ export function useTaskActions() {
         if (task) commit(markTaskDeleted(task, new Date()));
       },
     };
-  }, [queryClient, save, pushToast]);
+  }, [queryClient, pushToast]);
 }

@@ -3,7 +3,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { sessionKey, useSession } from "@/lib/client/session";
+import { sessionKey } from "@/lib/client/query-keys";
+import { useSession } from "@/lib/client/session";
 
 /**
  * View pages are static shells (so they work offline); the session is checked here instead.

@@ -4,9 +4,8 @@ import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tansta
 import { DEFAULT_SETTINGS, type Settings, type WeekStartsOn } from "@/lib/domain/settings";
 import { useToasts } from "@/lib/stores/toasts";
 import { api } from "./api";
+import { settingsKey } from "./query-keys";
 import { useSession } from "./session";
-
-export const settingsKey = ["settings"] as const;
 
 /** The user's settings; the defaults until they load (or when signed out). */
 export function useSettings(): Settings {

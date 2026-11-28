@@ -1,17 +1,18 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { SettingsIcon, SignOutIcon } from "@/components/ui/icons";
 import { signOutUser } from "@/lib/auth-actions";
 import { cn } from "@/lib/cn";
-import { usePendingTasks } from "@/lib/client/pending";
+import { useOfflineClient } from "@/lib/client/offline/context";
 import { useSession } from "@/lib/client/session";
+import { useOnline } from "@/lib/hooks/use-online";
 import { useNotificationState } from "@/lib/stores/notifications";
+import { useToasts } from "@/lib/stores/toasts";
 import { useUi } from "@/lib/stores/ui";
 
 const NAV_ICON_BUTTON =
-  "group grid size-8 place-items-center rounded-lg text-nav-fg-muted transition-colors hover:bg-white/8 hover:text-nav-fg";
+  "group grid size-8 place-items-center rounded-lg text-nav-fg-muted transition-colors enabled:hover:bg-white/8 enabled:hover:text-nav-fg disabled:opacity-50";
 
 function initials(name: string): string {
   return name
@@ -23,9 +24,30 @@ function initials(name: string): string {
 
 export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
   const { data: session } = useSession();
-  const queryClient = useQueryClient();
+  const offlineClient = useOfflineClient();
+  const online = useOnline();
   const openSettings = useUi((state) => state.openSettings);
+  const pushToast = useToasts((state) => state.push);
   if (!session) return null;
+
+  async function signOut() {
+    // Unsynced edits would be lost with this device's data; never drop them silently.
+    if (!(await offlineClient.prepareSignOut())) {
+      pushToast({
+        title: "Still signed in",
+        description: "Some edits haven't synced yet. Try again in a moment.",
+      });
+      return;
+    }
+    useNotificationState.getState().clear();
+    try {
+      await signOutUser();
+    } catch {
+      // Reloading below still works: the sign-in page sends a signed-in user back to the board.
+    }
+    // A full load, so nothing of this user's stays in memory for the next one.
+    window.location.replace("/signin");
+  }
 
   const name = session.user.name ?? session.user.email ?? "You";
 
@@ -72,16 +94,14 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
         >
           <SettingsIcon className="size-4 transition-transform duration-300 ease-spring group-hover:rotate-12" />
         </button>
-        <form
-          action={async () => {
-            // Drop this user's cached data before the next person signs in on this device.
-            queryClient.clear();
-            usePendingTasks.getState().clear();
-            useNotificationState.getState().clear();
-            await signOutUser();
-          }}
-        >
-          <button type="submit" aria-label="Sign out" title="Sign out" className={NAV_ICON_BUTTON}>
+        <form action={signOut}>
+          <button
+            type="submit"
+            aria-label="Sign out"
+            title={online ? "Sign out" : "Signing out needs a connection"}
+            disabled={!online}
+            className={NAV_ICON_BUTTON}
+          >
             <SignOutIcon className="size-4 transition-transform duration-300 ease-spring group-hover:translate-x-0.5" />
           </button>
         </form>
