@@ -6,23 +6,25 @@ import { cn } from "@/lib/cn";
 import { springs } from "@/lib/motion";
 
 const VARIANTS = {
-  /** The one primary action on screen: violet → fuchsia, with a light sweep on hover. */
+  /** The one primary action on screen: terracotta, with a light sweep on hover. */
   primary:
     "bg-cta sheen text-on-brand font-semibold shadow-cta hover:-translate-y-px hover:shadow-cta-hover",
-  /** Neutral surface button. */
+  /** Neutral white button on paper. */
   secondary:
-    "border border-line-strong bg-surface-raised text-fg hover:-translate-y-px hover:border-brand/60 hover:bg-brand/10 hover:shadow-glow-brand",
-  ghost: "text-fg-secondary hover:bg-white/6 hover:text-fg",
+    "border border-line-strong bg-surface text-fg shadow-card hover:-translate-y-px hover:border-fg/25 hover:shadow-card-hover",
+  ghost: "text-fg-secondary hover:bg-fg/6 hover:text-fg",
+  /** Ghost button on the navy navigation chrome. */
+  navGhost: "text-nav-fg-muted hover:bg-white/8 hover:text-nav-fg",
   /** Destructive confirmation (e.g. "Click again to delete"). */
-  danger:
-    "border border-danger/50 bg-danger/12 text-danger hover:bg-danger/20 hover:shadow-glow-danger",
+  danger: "border border-danger/40 bg-danger/10 text-danger hover:bg-danger/15",
 } as const;
 
 const RIPPLE: Record<keyof typeof VARIANTS, string> = {
   primary: "bg-white/40",
-  secondary: "bg-brand/40",
-  ghost: "bg-white/15",
-  danger: "bg-danger/35",
+  secondary: "bg-fg/10",
+  ghost: "bg-fg/10",
+  navGhost: "bg-white/15",
+  danger: "bg-danger/25",
 };
 
 const SIZES = {

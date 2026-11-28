@@ -8,14 +8,14 @@ import { CheckIcon, InfoIcon, XIcon } from "./icons";
 
 const TONE: Record<Toast["tone"], { icon: string; border: string; timer: string }> = {
   success: {
-    icon: "bg-success/15 text-success shadow-glow-success",
-    border: "border-success/35",
-    timer: "from-success to-info",
+    icon: "bg-success/12 text-success",
+    border: "border-success/30",
+    timer: "bg-success",
   },
   default: {
-    icon: "bg-brand/20 text-brand-text shadow-glow-brand",
-    border: "border-line-strong",
-    timer: "from-brand to-accent",
+    icon: "bg-info/12 text-info",
+    border: "border-line",
+    timer: "bg-info",
   },
 };
 
@@ -43,7 +43,7 @@ export function Toaster() {
               exit={{ opacity: 0, x: 40, scale: 0.96, transition: { duration: 0.2 } }}
               transition={springs.snappy}
               className={cn(
-                "pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-xl border glass p-3.5 shadow-lift",
+                "pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-xl border bg-surface p-3.5 shadow-lift",
                 tone.border,
               )}
             >
@@ -70,7 +70,7 @@ export function Toaster() {
               <span
                 aria-hidden
                 className={cn(
-                  "absolute inset-x-0 bottom-0 h-0.5 origin-left animate-toast-timer bg-linear-to-r",
+                  "absolute inset-x-0 bottom-0 h-0.5 origin-left animate-toast-timer",
                   tone.timer,
                 )}
                 style={{ animationDuration: `${TOAST_VISIBLE_MS}ms` }}

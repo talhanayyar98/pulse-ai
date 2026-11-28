@@ -1,6 +1,6 @@
 import type { PointerEvent } from "react";
 
-/** Moves a `spotlight` element's glow to the pointer (see the utility in globals.css). */
+/** Moves a `spotlight` element's wash to the pointer (see the utility in globals.css). */
 export function trackSpotlight(event: PointerEvent<HTMLElement>): void {
   const element = event.currentTarget;
   const rect = element.getBoundingClientRect();

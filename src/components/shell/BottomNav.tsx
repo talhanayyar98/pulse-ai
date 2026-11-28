@@ -14,7 +14,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Views"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line glass pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-nav-line bg-nav pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="mx-auto flex max-w-md">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
@@ -26,7 +26,7 @@ export function BottomNav() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
-                  active ? "text-fg" : "text-fg-secondary",
+                  active ? "text-nav-fg" : "text-nav-fg-muted",
                 )}
               >
                 <motion.span
@@ -38,13 +38,13 @@ export function BottomNav() {
                     <motion.span
                       layoutId="bottom-nav-active"
                       transition={springs.snappy}
-                      className="absolute inset-0 rounded-full bg-linear-to-r from-brand/35 to-accent/20 shadow-glow-brand"
+                      className="absolute inset-0 rounded-full bg-nav-raised"
                     />
                   )}
                   <Icon
                     className={cn(
                       "relative size-5 transition-[color,scale] duration-300 ease-spring",
-                      active && "scale-110 text-brand-text",
+                      active && "scale-110 text-nav-accent",
                     )}
                   />
                   {href === "/board" && (

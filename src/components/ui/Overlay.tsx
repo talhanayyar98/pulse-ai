@@ -32,10 +32,9 @@ const PANEL_MOTION: Record<"dialog" | "drawer", HTMLMotionProps<"div">> = {
 };
 
 const PANEL_CLASS: Record<"dialog" | "drawer", string> = {
-  dialog:
-    "relative mx-4 mt-[12vh] w-full max-w-xl rounded-2xl border border-line-strong shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8),0_0_60px_-20px_var(--color-brand-glow)]",
+  dialog: "relative mx-4 mt-[12vh] w-full max-w-xl rounded-2xl border border-line shadow-lift",
   drawer:
-    "absolute inset-y-0 right-0 flex w-full max-w-lg flex-col border-l border-line-strong shadow-[-30px_0_80px_-30px_rgb(0_0_0/0.8),-10px_0_60px_-30px_var(--color-brand-glow)]",
+    "absolute inset-y-0 right-0 flex w-full max-w-lg flex-col border-l border-line shadow-[-24px_0_60px_-28px_rgb(28_42_66/0.4)]",
 };
 
 interface OverlayProps {
@@ -168,7 +167,7 @@ function OverlayPanel({
     >
       <motion.div
         aria-hidden
-        className="absolute inset-0 bg-canvas/65 backdrop-blur-sm"
+        className="absolute inset-0 bg-nav/35 backdrop-blur-[2px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -180,18 +179,9 @@ function OverlayPanel({
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className={cn("glass outline-none", PANEL_CLASS[variant])}
+        className={cn("bg-surface outline-none", PANEL_CLASS[variant])}
         {...PANEL_MOTION[variant]}
       >
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute from-transparent via-accent/70 to-transparent",
-            variant === "dialog"
-              ? "inset-x-8 top-0 h-px bg-linear-to-r"
-              : "inset-y-10 left-0 w-px bg-linear-to-b",
-          )}
-        />
         {children}
       </motion.div>
     </div>

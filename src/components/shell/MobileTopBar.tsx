@@ -6,7 +6,7 @@ import { UserMenu } from "./UserMenu";
 
 export function MobileTopBar() {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line glass px-4 pt-[env(safe-area-inset-top)] md:hidden">
+    <header className="sticky top-0 z-30 flex items-center justify-between bg-nav px-4 pt-[env(safe-area-inset-top)] text-nav-fg md:hidden">
       <Link href="/board" aria-label="Pulse home" className="rounded-lg py-3">
         <Logo />
       </Link>

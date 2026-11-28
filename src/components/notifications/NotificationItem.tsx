@@ -16,10 +16,10 @@ const KIND: Record<
   NotificationKind,
   { Icon: ComponentType<SVGProps<SVGSVGElement>>; avatar: string }
 > = {
-  overdue: { Icon: AlertIcon, avatar: "bg-danger/15 text-danger ring-danger/40" },
-  due_soon: { Icon: ClockIcon, avatar: "bg-warning/15 text-warning ring-warning/40" },
-  stuck: { Icon: HourglassIcon, avatar: "bg-brand/20 text-brand-text ring-brand/45" },
-  completed: { Icon: CheckIcon, avatar: "bg-success/15 text-success ring-success/40" },
+  overdue: { Icon: AlertIcon, avatar: "bg-danger/10 text-danger ring-danger/25" },
+  due_soon: { Icon: ClockIcon, avatar: "bg-warning/10 text-warning ring-warning/25" },
+  stuck: { Icon: HourglassIcon, avatar: "bg-progress/10 text-progress ring-progress/25" },
+  completed: { Icon: CheckIcon, avatar: "bg-success/10 text-success ring-success/25" },
 };
 
 function message({ kind, task, ref }: NotificationView, now: Date): ReactNode {
@@ -87,8 +87,8 @@ export function NotificationItem({
         onClick={onOpen}
         onPointerMove={trackSpotlight}
         className={cn(
-          "spotlight flex w-full items-start gap-3 rounded-xl p-2.5 pr-10 text-left transition-colors duration-200 hover:bg-white/5",
-          item.unread && "bg-info/4",
+          "spotlight flex w-full items-start gap-3 rounded-xl p-2.5 pr-10 text-left transition-colors duration-200 hover:bg-fg/4",
+          item.unread && "bg-info/6",
         )}
       >
         <span
@@ -126,14 +126,12 @@ export function NotificationItem({
         aria-label={`Mark “${item.task.title}” as ${item.unread ? "read" : "unread"}`}
         title={item.unread ? "Mark as read" : "Mark as unread"}
         onClick={onToggleRead}
-        className="absolute top-1/2 right-2 grid size-7 -translate-y-1/2 place-items-center rounded-full transition-colors hover:bg-white/8"
+        className="absolute top-1/2 right-2 grid size-7 -translate-y-1/2 place-items-center rounded-full transition-colors hover:bg-fg/6"
       >
         <span
           className={cn(
             "size-2.5 rounded-full transition-[background-color,box-shadow,opacity] duration-200",
-            item.unread
-              ? "bg-info shadow-glow-info"
-              : "opacity-0 ring-1 ring-fg-muted group-hover/item:opacity-100",
+            item.unread ? "bg-info" : "opacity-0 ring-1 ring-fg-muted group-hover/item:opacity-100",
           )}
         />
       </button>

@@ -62,7 +62,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
     items.push({
       id: "create",
       group: "Create",
-      icon: <PlusIcon className="size-4 text-accent" />,
+      icon: <PlusIcon className="size-4 text-brand-text" />,
       label: (
         <>
           Create <span className="font-semibold text-fg">“{parsed.title}”</span>
@@ -117,7 +117,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
       items.push({
         id: `nav-${view.href}`,
         group: "Go to",
-        icon: <view.Icon className="size-4 text-brand-text" />,
+        icon: <view.Icon className="size-4 text-fg-muted" />,
         label: view.label,
         run: () => {
           onClose();
@@ -149,7 +149,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
             <PlusIcon className="size-4" strokeWidth={2.25} />
           </span>
         ) : (
-          <SearchIcon className="size-5 text-brand-text" />
+          <SearchIcon className="size-5 text-fg-muted" />
         )}
         <input
           data-autofocus
@@ -180,7 +180,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
           {items.map((item, index) => (
             <li key={item.id} role="presentation">
               {item.group !== items[index - 1]?.group && (
-                <p className="px-3 pt-2 pb-1 font-mono text-[11px] tracking-[0.14em] text-fg-muted uppercase">
+                <p className="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-[0.12em] text-fg-muted uppercase">
                   {item.group}
                 </p>
               )}
@@ -191,15 +191,14 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
                 onMouseMove={() => setActiveIndex(index)}
                 onClick={item.run}
                 className={cn(
-                  "relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-fg-secondary transition-[background-color,color,box-shadow,padding] duration-150",
-                  index === active &&
-                    "bg-linear-to-r from-brand/25 to-accent/8 pl-4 text-fg shadow-glow-brand",
+                  "relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition-[background-color,color,padding] duration-150",
+                  index === active ? "bg-brand/8 pl-4 text-fg" : "text-fg-secondary",
                 )}
               >
                 {index === active && (
                   <span
                     aria-hidden
-                    className="absolute top-2 bottom-2 left-1 w-0.75 rounded-full bg-linear-to-b from-brand-text to-accent"
+                    className="absolute top-2 bottom-2 left-1 w-0.75 rounded-full bg-brand"
                   />
                 )}
                 {item.icon}
@@ -226,8 +225,8 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
           <Kbd>↵</Kbd> select
         </span>
         <span className="ml-auto font-mono">
-          <span className="text-brand-text">#label</span> ·{" "}
-          <span className="text-accent">!high</span> <span className="text-danger">!urgent</span>
+          <span className="text-info">#label</span> · <span className="text-warning">!high</span>{" "}
+          <span className="text-danger">!urgent</span>
         </span>
       </footer>
     </div>

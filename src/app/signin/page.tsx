@@ -20,18 +20,20 @@ export default async function SignInPage() {
 
   return (
     <main className="grid min-h-dvh place-items-center px-5 py-10">
-      {/* A 1px frame of slowly turning aurora light around the card. */}
-      <div className="relative w-full max-w-sm animate-view-in overflow-hidden rounded-3xl p-px shadow-[0_30px_80px_-24px_rgb(0_0_0/0.9),0_0_80px_-30px_var(--color-brand-glow)]">
-        <div
-          aria-hidden
-          className="absolute -inset-1/2 animate-spin-slow bg-[conic-gradient(from_0deg,transparent_0%,var(--color-brand)_18%,var(--color-accent)_30%,transparent_45%,transparent_55%,var(--color-info)_72%,transparent_85%)]"
-        />
-        <div className="relative rounded-[calc(1.5rem-1px)] bg-surface/92 p-8 backdrop-blur-xl">
-          <Logo />
-          <h1 className="mt-10 text-3xl leading-tight font-semibold">
+      <div className="w-full max-w-sm animate-view-in overflow-hidden rounded-3xl border border-line bg-surface shadow-lift">
+        {/* The board's four column hues, as a cap along the top of the card. */}
+        <div aria-hidden className="flex h-1.5">
+          <span className="flex-1 bg-slate" />
+          <span className="flex-1 bg-info" />
+          <span className="flex-1 bg-progress" />
+          <span className="flex-1 bg-success" />
+        </div>
+        <div className="p-8">
+          <Logo className="text-fg" />
+          <h1 className="mt-10 text-4xl leading-tight font-semibold text-fg">
             Your tasks,
             <br />
-            <span className="text-gradient">with a pulse.</span>
+            <em className="font-normal text-brand-text">with a pulse.</em>
           </h1>
           <p className="mt-3 text-sm text-fg-secondary">
             Sign in to sync your board, plans and reminders across every device.
@@ -57,7 +59,7 @@ export default async function SignInPage() {
               </form>
             )}
             {!google && !dev && (
-              <p className="rounded-xl border border-line p-4 text-sm text-fg-secondary">
+              <p className="rounded-xl border border-line bg-canvas p-4 text-sm text-fg-secondary">
                 No sign-in method is configured. Set{" "}
                 <code className="font-mono">AUTH_GOOGLE_ID</code> and{" "}
                 <code className="font-mono">AUTH_GOOGLE_SECRET</code> (see the README).

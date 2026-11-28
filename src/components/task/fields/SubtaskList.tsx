@@ -27,13 +27,11 @@ export function SubtaskList({
     <div>
       {subtasks.length > 0 && (
         <div className="mb-3 flex items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/8">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-sunken">
             <motion.div
               className={cn(
-                "h-full rounded-full bg-linear-to-r transition-shadow duration-500",
-                complete
-                  ? "from-success to-info shadow-[0_0_12px_var(--color-success-glow)]"
-                  : "from-brand to-accent",
+                "h-full rounded-full transition-colors duration-500",
+                complete ? "bg-success" : "bg-info",
               )}
               initial={false}
               animate={{ width: `${(done / subtasks.length) * 100}%` }}
@@ -42,7 +40,7 @@ export function SubtaskList({
           </div>
           <span
             className={cn(
-              "font-mono text-xs transition-colors",
+              "text-xs font-medium tabular-nums transition-colors",
               complete ? "text-success" : "text-fg-secondary",
             )}
           >
@@ -61,7 +59,7 @@ export function SubtaskList({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={springs.snappy}
-              className="group flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-white/4"
+              className="group flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-fg/4"
             >
               <Checkbox
                 checked={subtask.done}
@@ -96,7 +94,7 @@ export function SubtaskList({
       </ul>
 
       {subtasks.length < LIMITS.subtasks && (
-        <div className="group mt-1 flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors focus-within:bg-white/3">
+        <div className="group mt-1 flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors focus-within:bg-fg/3">
           <PlusIcon className="size-5 text-fg-muted transition-[color,rotate] duration-300 ease-spring group-focus-within:rotate-90 group-focus-within:text-brand-text" />
           <input
             aria-label="Add subtask"

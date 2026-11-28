@@ -45,8 +45,8 @@ export function NotificationBell({ placement }: Readonly<{ placement: PanelPlace
         className={cn(
           "relative grid size-9 place-items-center rounded-xl transition-[color,background-color,box-shadow,scale] duration-200 active:scale-90",
           open
-            ? "bg-brand/20 text-fg shadow-glow-brand"
-            : "text-fg-secondary hover:bg-white/6 hover:text-fg",
+            ? "bg-nav-raised text-nav-fg"
+            : "text-nav-fg-muted hover:bg-white/8 hover:text-nav-fg",
         )}
       >
         {/* Re-keyed on every change so the bell rings when something new arrives. */}
@@ -66,7 +66,7 @@ export function NotificationBell({ placement }: Readonly<{ placement: PanelPlace
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
               transition={springs.snappy}
-              className="absolute -top-1 -right-1 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-danger-strong px-1 font-mono text-[10px] leading-none font-semibold text-on-brand shadow-[0_0_12px_-2px_var(--color-danger-glow)] ring-2 ring-canvas"
+              className="absolute -top-1 -right-1 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-danger-strong px-1 text-[10px] leading-none font-semibold text-on-brand tabular-nums ring-2 ring-nav"
             >
               {unseenCount > 9 ? "9+" : unseenCount}
             </motion.span>

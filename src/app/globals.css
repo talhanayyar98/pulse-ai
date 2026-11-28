@@ -1,72 +1,82 @@
 @import "tailwindcss";
 
 /*
- * Design tokens ("Aurora"): the one place to tune the palette.
- * Ink-indigo canvas, violet brand, fuchsia accent, and one colour per meaning:
- * info (cyan), success (emerald), warning (amber), danger (rose). Text is white at fixed opacities.
+ * Design tokens ("Atelier"): the one place to tune the palette.
+ * Warm ivory paper with white cards, navy navigation chrome, terracotta for the brand and
+ * primary actions, and one hue per board column: slate (Backlog), blue (To Do),
+ * ochre (In progress), green (Done). Rose is kept for overdue and urgent.
  * WCAG AA contrast for every text/background pairing is asserted in tests/unit/tokens.test.ts.
  *
  * Usage rules:
- *  - brand (#8b5cf6) is for fills, borders and glows. For purple TEXT use brand-text.
- *  - Primary actions use the bg-cta gradient (brand-strong → accent-deep) with on-brand text.
- *  - info: focus rings, unread markers, "To Do". success: done. warning: due soon.
- *  - danger: overdue. danger-strong is its filled form (count badges) with on-brand text.
+ *  - Paper (canvas, surface, sunken) carries ink text (fg, fg-secondary, fg-muted).
+ *  - Navy chrome (sidebar, mobile bars) carries nav-fg / nav-fg-muted; nav-accent marks
+ *    the current view. Tint hovers on navy with white/N, on paper with fg/N.
+ *  - Every hue below is text-safe on paper and on the column tints (*-soft), and carries
+ *    on-brand (white) text when used as a fill (count badges, checkbox).
+ *  - brand is for fills and borders; terracotta TEXT uses brand-text.
+ *  - Primary actions use the bg-cta gradient (brand → brand-strong) with on-brand text.
+ *  - focus: keyboard focus rings, visible on paper, tints and navy alike.
  */
 @theme {
   --color-*: initial;
 
-  /* Ink: canvas and surfaces (not named "base": it would clash with the text-base font size) */
-  --color-canvas: #0b0a16;
-  --color-surface: #13111f;
-  --color-surface-raised: #1c1930;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.14);
+  /* Paper (not named "base": it would clash with the text-base font size) */
+  --color-canvas: #f6f3ee;
+  --color-surface: #ffffff;
+  --color-sunken: #eee9e1;
+  --color-line: #e7e1d7;
+  --color-line-strong: #d5cdc0;
 
-  /* Violet: brand */
-  --color-brand: #8b5cf6;
-  --color-brand-deep: #5b21b6;
-  --color-brand-strong: #7c3aed;
-  --color-brand-text: #a78bfa;
-  --color-brand-glow: rgb(139 92 246 / 0.4);
+  /* Ink: text on paper */
+  --color-fg: #1f1b16;
+  --color-fg-secondary: #57504a;
+  --color-fg-muted: #6e665e;
 
-  /* Fuchsia: accent */
-  --color-accent: #e879f9;
-  --color-accent-deep: #c026d3;
-  --color-accent-glow: rgb(232 121 249 / 0.35);
+  /* Navy: navigation chrome */
+  --color-nav: #1c2a42;
+  --color-nav-raised: #2a3b5a;
+  --color-nav-line: rgb(255 255 255 / 0.1);
+  --color-nav-fg: #f3efe7;
+  --color-nav-fg-muted: #a9b3c6;
+  --color-nav-accent: #e2b766;
 
-  /* Meaning */
-  --color-info: #22d3ee;
-  --color-info-glow: rgb(34 211 238 / 0.35);
-  --color-success: #34d399;
-  --color-success-glow: rgb(52 211 153 / 0.35);
-  --color-warning: #fbbf24;
-  --color-danger: #fb7185;
-  --color-danger-strong: #e11d48;
-  --color-danger-glow: rgb(251 113 133 / 0.4);
-
-  /* Text */
-  --color-fg: rgb(255 255 255 / 0.92);
-  --color-fg-secondary: rgb(255 255 255 / 0.68);
-  --color-fg-muted: rgb(255 255 255 / 0.5);
+  /* Terracotta: brand */
+  --color-brand: #b5502b;
+  --color-brand-strong: #9c4120;
+  --color-brand-text: #a3451f;
   --color-on-brand: #ffffff;
-  --color-on-success: #0b0a16;
 
-  /* Neutral overlay for hover/pressed tints (never for text) */
+  /* Column hues, each with its tint for the column itself */
+  --color-slate: #556273;
+  --color-slate-soft: #eceef2;
+  --color-info: #2a5f9e;
+  --color-info-soft: #e8eef7;
+  --color-progress: #7d5800;
+  --color-progress-soft: #f8eedb;
+  --color-success: #2d6b47;
+  --color-success-soft: #e5f0e8;
+
+  /* Signals: due soon / high priority, overdue / urgent */
+  --color-warning: #9e4f00;
+  --color-danger: #b02433;
+  --color-danger-strong: #c0283a;
+
+  /* Extra label hues */
+  --color-teal: #1d6b6e;
+  --color-plum: #7a4386;
+
+  --color-focus: #3b82f6;
+
+  /* Neutral overlay for tints on navy and for light effects (never for text on paper) */
   --color-white: #ffffff;
 
-  /* Elevation and glow */
-  --shadow-lift: 0 18px 40px -12px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.45);
-  --shadow-glow-brand: 0 0 0 1px rgb(139 92 246 / 0.55), 0 0 28px -6px var(--color-brand-glow);
-  --shadow-glow-accent: 0 0 0 1px rgb(232 121 249 / 0.5), 0 0 28px -6px var(--color-accent-glow);
-  --shadow-glow-info: 0 0 0 1px rgb(34 211 238 / 0.5), 0 0 18px -4px var(--color-info-glow);
-  --shadow-glow-success: 0 0 0 1px rgb(52 211 153 / 0.6), 0 0 18px -4px var(--color-success-glow);
-  --shadow-glow-danger: 0 0 0 1px rgb(251 113 133 / 0.6), 0 0 18px -4px var(--color-danger-glow);
-  --shadow-cta:
-    0 10px 28px -12px rgb(192 38 211 / 0.75), 0 4px 14px -6px rgb(124 58 237 / 0.6),
-    inset 0 1px 0 rgb(255 255 255 / 0.22);
+  /* Elevation: warm, soft shadows */
+  --shadow-card: 0 1px 2px rgb(31 27 22 / 0.06), 0 1px 1px rgb(31 27 22 / 0.03);
+  --shadow-card-hover: 0 12px 24px -12px rgb(31 27 22 / 0.22), 0 2px 6px -2px rgb(31 27 22 / 0.08);
+  --shadow-lift: 0 28px 60px -22px rgb(28 42 66 / 0.38), 0 8px 18px -8px rgb(28 42 66 / 0.14);
+  --shadow-cta: 0 6px 16px -8px rgb(156 65 32 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.2);
   --shadow-cta-hover:
-    0 16px 36px -12px rgb(192 38 211 / 0.9), 0 0 28px -4px var(--color-brand-glow),
-    inset 0 1px 0 rgb(255 255 255 / 0.3);
+    0 12px 24px -10px rgb(156 65 32 / 0.75), inset 0 1px 0 rgb(255 255 255 / 0.25);
 
   /* Motion */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -75,12 +85,9 @@
   --animate-fade-up: fade-up 520ms var(--ease-out-expo) backwards;
   --animate-drift: drift 28s ease-in-out infinite alternate;
   --animate-drift-slow: drift 40s ease-in-out -12s infinite alternate-reverse;
-  --animate-drift-fast: drift 18s ease-in-out -6s infinite alternate;
   --animate-float: float 6s ease-in-out infinite;
   --animate-overdue: overdue-pulse 2.4s ease-in-out infinite;
-  --animate-gradient-pan: gradient-pan 8s ease-in-out infinite alternate;
   --animate-heartbeat: heartbeat 2.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-  --animate-spin-slow: spin 7s linear infinite;
   --animate-ping-soft: ping-soft 2s cubic-bezier(0, 0, 0.2, 1) infinite;
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
   --animate-toast-timer: toast-timer linear forwards;
@@ -122,22 +129,13 @@
     0%,
     100% {
       box-shadow:
-        0 0 0 1px rgb(251 113 133 / 0.3),
-        0 0 0 0 rgb(251 113 133 / 0);
+        0 0 0 1px rgb(176 36 51 / 0.25),
+        0 1px 2px rgb(31 27 22 / 0.06);
     }
     50% {
       box-shadow:
-        0 0 0 1px rgb(251 113 133 / 0.8),
-        0 0 22px -2px rgb(251 113 133 / 0.45);
-    }
-  }
-
-  @keyframes gradient-pan {
-    from {
-      background-position: 0% 50%;
-    }
-    to {
-      background-position: 100% 50%;
+        0 0 0 1px rgb(176 36 51 / 0.6),
+        0 6px 18px -6px rgb(176 36 51 / 0.35);
     }
   }
 
@@ -151,12 +149,6 @@
     }
     to {
       stroke-dashoffset: -100;
-    }
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
     }
   }
 
@@ -207,22 +199,17 @@
 /* next/font exposes these variables on <html>; inline so utilities resolve them at use site. */
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
-}
-
-@utility glass {
-  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  backdrop-filter: blur(18px) saturate(150%);
 }
 
 /* The primary-action gradient. Its position drifts on hover (transition background-position). */
 @utility bg-cta {
   background-image: linear-gradient(
     120deg,
-    var(--color-brand-strong),
-    var(--color-accent-deep) 55%,
-    var(--color-brand-strong)
+    var(--color-brand),
+    var(--color-brand-strong) 55%,
+    var(--color-brand)
   );
   background-size: 200% 100%;
   background-position: 0% 50%;
@@ -230,21 +217,6 @@
   &:hover {
     background-position: 60% 50%;
   }
-}
-
-/* Headings in a slowly shifting white → violet → fuchsia gradient. */
-@utility text-gradient {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-fg) 20%,
-    var(--color-brand-text) 50%,
-    var(--color-accent) 70%,
-    var(--color-fg) 90%
-  );
-  background-size: 220% 100%;
-  background-clip: text;
-  color: transparent;
-  animation: var(--animate-gradient-pan);
 }
 
 /* A light sweep across a button on hover. The host needs `relative isolate overflow-hidden`. */
@@ -258,7 +230,7 @@
     background: linear-gradient(
       90deg,
       transparent 30%,
-      rgb(255 255 255 / 0.32) 50%,
+      rgb(255 255 255 / 0.28) 50%,
       transparent 70%
     );
     transform: translateX(-110%) skewX(-18deg);
@@ -274,7 +246,7 @@
 }
 
 /*
- * A glow that follows the cursor. Set --spot-x / --spot-y on the element (trackSpotlight);
+ * A soft wash that follows the cursor. Set --spot-x / --spot-y on the element (trackSpotlight);
  * --spot-color tints it. The element's content must sit above its own background.
  */
 @utility spotlight {
@@ -292,7 +264,7 @@
     transition: opacity 300ms;
     background: radial-gradient(
       260px circle at var(--spot-x, 50%) var(--spot-y, -40%),
-      var(--spot-color, rgb(139 92 246 / 0.2)),
+      var(--spot-color, color-mix(in srgb, var(--color-brand) 7%, transparent)),
       transparent 70%
     );
   }
@@ -303,11 +275,11 @@
 
 /* Loading placeholder with a light band passing over it. */
 @utility skeleton {
-  background-color: rgb(255 255 255 / 0.04);
+  background-color: color-mix(in srgb, var(--color-fg) 5%, transparent);
   background-image: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(255 255 255 / 0.07) 50%,
+    rgb(255 255 255 / 0.65) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -315,31 +287,29 @@
   animation: var(--animate-shimmer);
 }
 
-/* Fine film grain over the ambient background, so gradients never band. */
+/* Fine ink grain over the background, so the paper has a little tooth. */
 @utility bg-grain {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.1 0 0 0 0 0.08 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
 /* Text inputs, selects and textareas. Focus keeps the global ring. */
 @utility field {
   border-radius: 0.625rem;
-  border: 1px solid var(--color-line);
-  background-color: rgb(11 10 22 / 0.55);
+  border: 1px solid var(--color-line-strong);
+  background-color: var(--color-surface);
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
   color: var(--color-fg);
   transition:
     border-color 150ms,
-    box-shadow 150ms,
-    background-color 150ms;
+    box-shadow 150ms;
 
   &:hover:not(:disabled) {
-    border-color: var(--color-line-strong);
-    background-color: rgb(11 10 22 / 0.75);
+    border-color: color-mix(in srgb, var(--color-fg) 30%, transparent);
   }
   &:focus-visible {
-    border-color: var(--color-brand);
-    box-shadow: 0 0 0 4px rgb(139 92 246 / 0.18);
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 18%, transparent);
   }
   &::placeholder {
     color: var(--color-fg-muted);
@@ -364,6 +334,7 @@
     }
     & :where(h1, h2, h3, h4) {
       margin: 1rem 0 0.5rem;
+      font-family: var(--font-display);
       font-weight: 600;
       color: var(--color-fg);
     }
@@ -400,7 +371,7 @@
     }
     & code {
       border-radius: 0.375rem;
-      background-color: rgb(255 255 255 / 0.06);
+      background-color: var(--color-sunken);
       padding: 0.1rem 0.35rem;
       font-family: var(--font-mono);
       font-size: 0.85em;
@@ -409,7 +380,7 @@
     & pre {
       overflow-x: auto;
       border-radius: 0.625rem;
-      background-color: rgb(11 10 22 / 0.7);
+      background-color: var(--color-sunken);
       padding: 0.75rem;
     }
     & pre code {
@@ -430,7 +401,7 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     /* Background lives on <html> only so the fixed ambient layer (z-index -1) paints above it. */
     background-color: var(--color-canvas);
   }
@@ -442,25 +413,26 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Fraunces (with its optical-size axis) for headings and titles; Inter for everything else. */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(255 255 255 / 0.14) transparent;
+    scrollbar-color: rgb(31 27 22 / 0.2) transparent;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-info);
+    outline: 2px solid var(--color-focus);
     outline-offset: 2px;
   }
 
   ::selection {
-    background-color: var(--color-brand-glow);
+    background-color: color-mix(in srgb, var(--color-brand) 20%, transparent);
   }
 }
 

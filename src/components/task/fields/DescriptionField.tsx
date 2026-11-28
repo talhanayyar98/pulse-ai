@@ -46,7 +46,7 @@ export function DescriptionField({
           className="min-h-40 w-full resize-y field leading-relaxed"
         />
       ) : draft ? (
-        <div className="markdown animate-fade-up rounded-xl border border-line bg-canvas/35 px-4 py-3">
+        <div className="markdown animate-fade-up rounded-xl border border-line bg-canvas px-4 py-3">
           <Markdown
             components={{
               a: ({ node: _node, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
@@ -59,7 +59,7 @@ export function DescriptionField({
         <button
           type="button"
           onClick={() => setMode("write")}
-          className="w-full rounded-xl border border-dashed border-line px-4 py-6 text-sm text-fg-muted transition-colors duration-200 hover:border-brand/50 hover:bg-brand/5 hover:text-fg-secondary"
+          className="w-full rounded-xl border border-dashed border-line-strong px-4 py-6 text-sm text-fg-muted transition-colors duration-200 hover:border-brand/45 hover:bg-brand/5 hover:text-fg-secondary"
         >
           No description yet. Click to write one.
         </button>

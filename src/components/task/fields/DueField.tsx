@@ -34,7 +34,7 @@ export function DueField({ due, onCommit }: Readonly<{ due: Due; onCommit: (due:
         aria-label="Due date"
         value={draft.date}
         onChange={(event) => setDraft({ ...draft, date: event.target.value })}
-        className="field font-mono"
+        className="field tabular-nums"
       />
       <input
         type="time"
@@ -42,7 +42,7 @@ export function DueField({ due, onCommit }: Readonly<{ due: Due; onCommit: (due:
         value={draft.time}
         disabled={!draft.date}
         onChange={(event) => setDraft({ ...draft, time: event.target.value })}
-        className="field font-mono"
+        className="field tabular-nums"
       />
       {draft.date && (
         <button
@@ -52,7 +52,7 @@ export function DueField({ due, onCommit }: Readonly<{ due: Due; onCommit: (due:
             setDraft({ date: "", time: "" });
             onCommit({ dueAt: null, allDay: false });
           }}
-          className="rounded-lg p-1.5 text-fg-muted transition-colors hover:bg-white/5 hover:text-fg"
+          className="rounded-lg p-1.5 text-fg-muted transition-colors hover:bg-fg/6 hover:text-fg"
         >
           <XIcon className="size-4" />
         </button>

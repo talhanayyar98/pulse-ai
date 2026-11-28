@@ -24,7 +24,8 @@ export function parseColor(value: string): Rgba {
   throw new Error(`Unsupported color format: ${value}`);
 }
 
-function composite(fg: Rgba, bg: Rgba): Rgba {
+/** `fg` (with its alpha) painted over an opaque `bg`. */
+export function composite(fg: Rgba, bg: Rgba): Rgba {
   const mix = (f: number, b: number) => f * fg.a + b * (1 - fg.a);
   return { r: mix(fg.r, bg.r), g: mix(fg.g, bg.g), b: mix(fg.b, bg.b), a: 1 };
 }

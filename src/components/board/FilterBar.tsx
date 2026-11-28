@@ -76,7 +76,7 @@ export function FilterBar({
 
       {active && (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-fg-secondary">
+          <span className="text-xs text-fg-secondary tabular-nums">
             {visibleCount} of {totalCount}
           </span>
           <Button variant="ghost" size="sm" className="group" onClick={clear}>
@@ -114,8 +114,8 @@ function Chip({
       className={cn(
         "inline-flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition-[color,background-color,border-color,box-shadow,translate,scale] duration-200 active:scale-95",
         pressed
-          ? "border-brand/60 bg-linear-to-r from-brand/35 to-accent/15 text-fg shadow-glow-brand"
-          : "border-line bg-surface/40 text-fg-secondary hover:-translate-y-px hover:border-line-strong hover:bg-white/5 hover:text-fg",
+          ? "border-brand/45 bg-brand/10 text-brand-text"
+          : "border-line bg-surface text-fg-secondary hover:-translate-y-px hover:border-line-strong hover:text-fg hover:shadow-card",
       )}
     >
       {children}
