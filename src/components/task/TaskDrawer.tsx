@@ -22,6 +22,7 @@ import { useUi } from "@/lib/stores/ui";
 import { DescriptionField } from "./fields/DescriptionField";
 import { DueField } from "./fields/DueField";
 import { LabelsField } from "./fields/LabelsField";
+import { RepeatField } from "./fields/RepeatField";
 import { SubtaskList } from "./fields/SubtaskList";
 import { TitleField } from "./fields/TitleField";
 import { PriorityIcon } from "./PriorityIcon";
@@ -145,6 +146,11 @@ function TaskDetails({
           <dt className="mt-3 text-fg-secondary sm:mt-0">Due</dt>
           <dd>
             <DueField due={task} onCommit={(due) => update(due)} />
+          </dd>
+
+          <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1">Repeat</dt>
+          <dd>
+            <RepeatField task={task} onChange={update} />
           </dd>
 
           <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1">Labels</dt>

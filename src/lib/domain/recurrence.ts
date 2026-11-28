@@ -4,6 +4,7 @@ import {
   addWeeks,
   differenceInCalendarDays,
   getDate,
+  getDay,
   getDaysInMonth,
   setDate,
   startOfMonth,
@@ -38,6 +39,13 @@ export const recurrenceSchema = z.discriminatedUnion("freq", [
 export type Recurrence = z.infer<typeof recurrenceSchema>;
 export type WeeklyRecurrence = Extract<Recurrence, { freq: "weekly" }>;
 export type MonthlyRecurrence = Extract<Recurrence, { freq: "monthly" }>;
+
+/** A new rule that repeats on `anchor`'s weekday, or on its day of the month. */
+export function recurrenceFor(freq: RecurrenceFreq, anchor: Date): Recurrence {
+  return freq === "weekly"
+    ? { freq, interval: 1, byWeekday: [getDay(anchor)] }
+    : { freq, interval: 1, byMonthDay: [getDate(anchor)] };
+}
 
 /**
  * The rule's first date after `from`'s day, at `from`'s time of day.

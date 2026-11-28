@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { nextOccurrence, type Recurrence, recurrenceSchema } from "@/lib/domain/recurrence";
+import {
+  nextOccurrence,
+  type Recurrence,
+  recurrenceFor,
+  recurrenceSchema,
+} from "@/lib/domain/recurrence";
 
 // Tests run in Europe/London (vitest.config.ts). Months are 0-based, as in Date.
 const local = (year: number, month: number, day: number, hours = 0, minutes = 0) =>
@@ -85,6 +90,14 @@ describe("nextOccurrence: monthly", () => {
 
   it("continues from an occurrence that was moved off the pattern", () => {
     expect(nextOccurrence(monthly([15]), local(2027, 1, 20), 1)).toEqual(local(2027, 2, 15));
+  });
+});
+
+describe("recurrenceFor", () => {
+  it("starts a rule on the anchor's weekday or day of the month", () => {
+    const thursday3Dec = local(2026, 12, 3, 9);
+    expect(recurrenceFor("weekly", thursday3Dec)).toEqual(weekly([THU]));
+    expect(recurrenceFor("monthly", thursday3Dec)).toEqual(monthly([3]));
   });
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ClockIcon, SubtasksIcon } from "@/components/ui/icons";
+import { ClockIcon, RepeatIcon, SubtasksIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
 import { isDueSoon, isOverdue } from "@/lib/domain/filters";
 import type { Priority, Task } from "@/lib/domain/task";
@@ -96,6 +96,7 @@ export function TaskCard({
               {due}
             </span>
           )}
+          {task.recurrence && <RepeatBadge freq={task.recurrence.freq} />}
           {task.subtasks.length > 0 && (
             <span
               className={cn(
@@ -110,5 +111,15 @@ export function TaskCard({
         </div>
       )}
     </div>
+  );
+}
+
+/** A small loop marking a repeating task; its name says how often. */
+export function RepeatBadge({ freq }: Readonly<{ freq: "weekly" | "monthly" }>) {
+  const label = freq === "weekly" ? "Repeats weekly" : "Repeats monthly";
+  return (
+    <span role="img" aria-label={label} title={label} className="inline-flex text-fg-muted">
+      <RepeatIcon className="size-3.5" />
+    </span>
   );
 }
