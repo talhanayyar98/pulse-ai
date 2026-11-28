@@ -34,7 +34,7 @@ export function LabelsField({
             exit={{ opacity: 0, scale: 0.8 }}
             transition={springs.snappy}
             className={cn(
-              "inline-flex items-center gap-1 rounded-md py-0.5 pr-0.5 pl-2 text-xs",
+              "inline-flex items-center gap-1 rounded-md py-0.5 pr-0.5 pl-2 text-xs font-medium",
               labelTone(label).chip,
             )}
           >
@@ -43,7 +43,7 @@ export function LabelsField({
               type="button"
               aria-label={`Remove label ${label}`}
               onClick={() => onChange(labels.filter((existing) => existing !== label))}
-              className="rounded p-0.5 transition hover:rotate-90 hover:bg-white/10 hover:text-fg"
+              className="rounded p-0.5 transition hover:rotate-90 hover:bg-fg/10 hover:text-fg"
             >
               <XIcon className="size-3" />
             </button>

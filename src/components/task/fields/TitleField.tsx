@@ -29,7 +29,7 @@ export function TitleField({
           event.currentTarget.blur();
         }
       }}
-      className="field-sizing-content w-full resize-none rounded-lg bg-transparent font-display text-2xl leading-tight font-semibold tracking-tight outline-offset-4"
+      className="field-sizing-content w-full resize-none rounded-lg bg-transparent font-display text-2xl leading-tight font-semibold tracking-tight text-fg outline-offset-4"
     />
   );
 }

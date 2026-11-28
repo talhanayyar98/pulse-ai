@@ -8,12 +8,12 @@ import { springs } from "@/lib/motion";
 /** Confetti for the moment of ticking a box: angle (radians) and colour per particle. */
 const BURST = [
   "bg-success",
-  "bg-accent",
+  "bg-brand",
   "bg-info",
-  "bg-brand-text",
+  "bg-progress",
   "bg-success",
-  "bg-warning",
-  "bg-accent",
+  "bg-teal",
+  "bg-plum",
   "bg-info",
 ].map((color, index, all) => ({ color, angle: (index / all.length) * Math.PI * 2 }));
 
@@ -40,11 +40,11 @@ export function Checkbox({
       className={cn(
         "relative grid size-5 shrink-0 place-items-center rounded-md border transition-[background-color,border-color,box-shadow] duration-200",
         checked
-          ? "border-success bg-success shadow-glow-success"
-          : "border-line-strong hover:border-brand hover:shadow-glow-brand",
+          ? "border-success bg-success"
+          : "border-line-strong bg-surface hover:border-success",
       )}
     >
-      <svg viewBox="0 0 16 16" className="size-3.5 text-on-success" aria-hidden>
+      <svg viewBox="0 0 16 16" className="size-3.5 text-on-brand" aria-hidden>
         <motion.path
           d="M3.5 8.5l3 3 6-7"
           fill="none"

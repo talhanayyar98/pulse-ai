@@ -1,5 +1,5 @@
 /*
- * Small decorative SVGs for empty states: violet linework with one bright accent.
+ * Small decorative SVGs for empty states: paper cards in the board's hues, one terracotta accent.
  * aria-hidden because the adjacent heading carries the meaning.
  */
 
@@ -25,11 +25,11 @@ export function WeekIllustration() {
           width="11"
           height={day === 4 ? 40 : 14 + ((day * 7) % 18)}
           rx="4"
-          className={day === 4 ? "fill-accent" : "fill-brand/35"}
+          className={day === 4 ? "fill-brand" : day % 2 ? "fill-info/30" : "fill-slate/25"}
         />
       ))}
       <circle cx="26" cy="26" r="4" className="fill-brand" />
-      <path d="M38 26h40" strokeWidth="4" strokeLinecap="round" className="stroke-white/15" />
+      <path d="M38 26h40" strokeWidth="4" strokeLinecap="round" className="stroke-fg/12" />
     </svg>
   );
 }
@@ -54,10 +54,10 @@ export function MonthIllustration() {
           width="16"
           height="12"
           rx="4"
-          className={i === 8 ? "fill-info" : "fill-brand/25"}
+          className={i === 8 ? "fill-brand" : i % 3 === 0 ? "fill-success/25" : "fill-info/20"}
         />
       ))}
-      <path d="M22 22h28" strokeWidth="4" strokeLinecap="round" className="stroke-white/15" />
+      <path d="M22 22h28" strokeWidth="4" strokeLinecap="round" className="stroke-fg/12" />
     </svg>
   );
 }
@@ -72,9 +72,9 @@ export function OfflineIllustration() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeDasharray="4 10"
-        className="stroke-brand/60"
+        className="stroke-slate/50"
       />
-      <circle cx="122" cy="62" r="7" className="fill-accent" />
+      <circle cx="122" cy="62" r="7" className="fill-brand" />
     </svg>
   );
 }

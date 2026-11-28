@@ -122,21 +122,17 @@ function PanelBody({ id, placement, items, fresh, anchorRef, onClose }: Notifica
       exit={{ opacity: 0, scale: 0.96, y: -6, filter: "blur(4px)" }}
       transition={{ type: "spring", stiffness: 480, damping: 34 }}
       className={cn(
-        "fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-line-strong glass shadow-[0_30px_80px_-20px_rgb(0_0_0/0.85),0_0_60px_-24px_var(--color-brand-glow)] outline-none",
+        "fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-line bg-surface text-fg shadow-lift outline-none",
         PLACEMENT[placement],
       )}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-accent/70 to-transparent"
-      />
       <header className="flex items-center justify-between gap-3 px-4 pt-4 pb-3">
         <h2 className="text-lg font-semibold">Notifications</h2>
         <button
           type="button"
           disabled={unreadCount === 0}
           onClick={() => markAllRead(items.map((item) => item.id))}
-          className="rounded-lg px-2 py-1 text-xs font-medium text-info transition-colors hover:bg-info/10 disabled:pointer-events-none disabled:text-fg-muted"
+          className="rounded-lg px-2 py-1 text-xs font-medium text-info transition-colors hover:bg-info/8 disabled:pointer-events-none disabled:text-fg-muted"
         >
           Mark all as read
         </button>
@@ -159,7 +155,7 @@ function PanelBody({ id, placement, items, fresh, anchorRef, onClose }: Notifica
         ) : (
           groups.map((group) => (
             <section key={group.label} aria-label={group.label} className="pt-2">
-              <h3 className="px-2.5 pb-1 font-mono text-[11px] font-normal tracking-[0.14em] text-fg-muted uppercase">
+              <h3 className="px-2.5 pb-1 font-sans text-[11px] font-semibold tracking-[0.12em] text-fg-muted uppercase">
                 {group.label}
               </h3>
               <ul className="flex flex-col gap-0.5">
@@ -187,7 +183,7 @@ function PanelBody({ id, placement, items, fresh, anchorRef, onClose }: Notifica
 function EmptyPanel({ filter }: Readonly<{ filter: Filter }>) {
   return (
     <div className="flex flex-col items-center px-6 pt-8 pb-10 text-center">
-      <span className="grid size-14 animate-float place-items-center rounded-2xl bg-linear-135 from-brand/35 to-accent/20 text-brand-text shadow-glow-brand">
+      <span className="grid size-14 animate-float place-items-center rounded-2xl bg-brand/10 text-brand-text">
         <BellIcon className="size-7" />
       </span>
       <p className="mt-4 font-display font-semibold">

@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     background_color: palette.canvas,
-    theme_color: palette.canvas,
+    theme_color: palette.nav,
     categories: ["productivity"],
     // Re-use an open Pulse window for shortcuts and (later) notification clicks.
     launch_handler: { client_mode: ["navigate-existing", "auto"] },

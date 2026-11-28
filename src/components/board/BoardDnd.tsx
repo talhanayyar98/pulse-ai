@@ -319,7 +319,7 @@ function CardSkeletons() {
       {[0, 1, 2].map((index) => (
         <div
           key={index}
-          className="h-16 skeleton rounded-xl border border-line"
+          className="h-16 skeleton rounded-xl border border-fg/5"
           style={{ animationDelay: `${index * 120}ms`, opacity: 1 - index * 0.25 }}
         />
       ))}

@@ -24,10 +24,10 @@ export function OverdueBadge({
           exit={{ scale: 0.6, opacity: 0 }}
           transition={springs.snappy}
           className={cn(
-            "inline-flex items-center justify-center rounded-full font-mono font-semibold",
+            "inline-flex items-center justify-center rounded-full font-semibold tabular-nums",
             variant === "pill"
-              ? "h-6 gap-1.5 border border-danger/45 bg-danger/12 px-2.5 text-xs text-danger shadow-glow-danger"
-              : "h-4.5 min-w-4.5 bg-danger-strong px-1 text-[10px] text-on-brand shadow-[0_0_12px_-2px_var(--color-danger-glow)]",
+              ? "h-6 gap-1.5 border border-danger/30 bg-danger/10 px-2.5 text-xs text-danger"
+              : "h-4.5 min-w-4.5 bg-danger-strong px-1 text-[10px] text-on-brand",
             className,
           )}
         >

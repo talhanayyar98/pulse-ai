@@ -74,7 +74,12 @@ function TaskDetails({
 
   return (
     <>
-      <header className="flex items-center gap-2 border-b border-line px-5 py-3">
+      <header
+        className={cn(
+          "flex items-center gap-2 border-b border-line px-5 py-3 transition-colors duration-300",
+          STATUS_TONE[task.status].soft,
+        )}
+      >
         <label className="relative">
           <span className="sr-only">Status</span>
           <span
@@ -191,7 +196,7 @@ function TaskFooter({ task, onDelete }: Readonly<{ task: Task; onDelete: () => v
 
   return (
     <footer className="flex items-center gap-3 border-t border-line px-5 py-3">
-      <p className="flex-1 font-mono text-[11px] text-fg-muted">
+      <p className="flex-1 text-xs text-fg-muted">
         Created {format(task.createdAt, "d MMM yyyy")} · Updated {updated}
       </p>
       <Button

@@ -36,17 +36,12 @@ function composeSvg(glyph: string, variant: Variant): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${palette.brandStrong}"/>
-      <stop offset="0.6" stop-color="${palette.brandDeep}"/>
-      <stop offset="1" stop-color="${palette.accentDeep}"/>
+      <stop offset="0" stop-color="${palette.brand}"/>
+      <stop offset="1" stop-color="${palette.brandStrong}"/>
     </linearGradient>
     <radialGradient id="shine" cx="0.25" cy="0.15" r="0.85">
-      <stop offset="0" stop-color="${palette.brand}" stop-opacity="0.75"/>
-      <stop offset="1" stop-color="${palette.brand}" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="ember" cx="0.85" cy="0.9" r="0.7">
-      <stop offset="0" stop-color="${palette.accent}" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="${palette.accent}" stop-opacity="0"/>
+      <stop offset="0" stop-color="${palette.onBrand}" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="${palette.onBrand}" stop-opacity="0"/>
     </radialGradient>
     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="1.6"/>
@@ -54,7 +49,6 @@ function composeSvg(glyph: string, variant: Variant): string {
   </defs>
   <rect x="${inset}" y="${inset}" width="${size}" height="${size}" rx="${radius}" fill="url(#bg)"/>
   <rect x="${inset}" y="${inset}" width="${size}" height="${size}" rx="${radius}" fill="url(#shine)"/>
-  <rect x="${inset}" y="${inset}" width="${size}" height="${size}" rx="${radius}" fill="url(#ember)"/>
   <g transform="translate(${offset} ${offset}) scale(${glyphScale})" color="${palette.onBrand}">
     <g filter="url(#glow)" opacity="0.75">${glyph}</g>
     ${glyph}

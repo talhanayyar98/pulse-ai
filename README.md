@@ -92,7 +92,7 @@ In quick add, `#label` adds a label and `!low` / `!med` / `!high` / `!urgent` se
 
 ## Design tokens
 
-The whole palette ("Aurora") lives in one place: the `@theme` block in [`src/app/globals.css`](src/app/globals.css). An ink-indigo canvas, violet brand and fuchsia accent (primary actions use the violet → fuchsia `bg-cta` gradient), plus one colour per meaning: cyan for info and focus, emerald for done, amber for due soon, rose for overdue. Text is white at fixed opacities. `tests/unit/tokens.test.ts` fails if a change breaks WCAG AA contrast or drifts from the values the manifest and icons use (`src/lib/theme.ts`).
+The whole palette ("Atelier") lives in one place: the `@theme` block in [`src/app/globals.css`](src/app/globals.css). Warm ivory paper with white cards, navy navigation chrome (sidebar and mobile bars, with a brass marker on the current view), and terracotta for the brand and primary actions (`bg-cta`). Each board column has its own hue and tint: slate for Backlog, blue for To Do, ochre for In Progress, green for Done. Amber marks due soon and high priority; rose marks overdue and urgent. Labels pick one of six muted hues from their name. Headings and titles use Fraunces; everything else uses Inter. `tests/unit/tokens.test.ts` fails if a change breaks WCAG AA contrast (text on paper, tints, navy and coloured badges, plus a visible focus ring) or drifts from the values the manifest and icons use (`src/lib/theme.ts`).
 
 Motion respects the system's reduced-motion setting: CSS animations collapse to their end state and Motion skips transform animations.
 

@@ -11,11 +11,11 @@ export function EmptyState({
       <div className="relative mb-6">
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 scale-125 rounded-full bg-[radial-gradient(circle,var(--color-brand-glow),transparent_65%)] blur-xl"
+          className="absolute inset-0 -z-10 scale-125 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-brand)_12%,transparent),transparent_65%)] blur-xl"
         />
         <div className="animate-float">{illustration}</div>
       </div>
-      <h2 className="text-gradient text-xl font-semibold">{title}</h2>
+      <h2 className="text-2xl font-semibold text-fg">{title}</h2>
       <p className="mt-2 text-sm text-fg-secondary">{body}</p>
       {action && <div className="mt-6">{action}</div>}
     </div>

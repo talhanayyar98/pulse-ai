@@ -21,7 +21,7 @@ export function BoardColumn({
   status: TaskStatus;
   count: number;
   taskIds: string[];
-  /** The column a dragged card is currently over: it glows. */
+  /** The column a dragged card is currently over: it gets a ring in its own hue. */
   highlighted: boolean;
   children: ReactNode;
 }>) {
@@ -33,34 +33,30 @@ export function BoardColumn({
     <section
       aria-label={label}
       className={cn(
-        "relative flex w-[min(20rem,82vw)] shrink-0 snap-start flex-col rounded-2xl border transition-[border-color,box-shadow,background-color] duration-300 xl:w-auto xl:shrink",
-        highlighted
-          ? "border-brand/70 bg-brand/10 shadow-glow-brand"
-          : "border-line bg-surface/55 hover:border-line-strong",
+        "relative flex w-[min(20rem,82vw)] shrink-0 snap-start flex-col rounded-2xl border border-t-[3px] transition-[box-shadow] duration-300 xl:w-auto xl:shrink",
+        tone.soft,
+        tone.border,
+        highlighted && cn("ring-2", tone.ring),
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-x-6 top-0 h-px bg-linear-to-r from-transparent to-transparent",
-          tone.edge,
-        )}
-      />
-      <header className="flex items-center gap-2.5 px-4 pt-4 pb-3">
+      <header className="flex items-center gap-2.5 px-4 pt-3.5 pb-3">
         <span className="relative flex size-2" aria-hidden>
           {status === "in_progress" && (
-            <span className="absolute inset-0 animate-ping-soft rounded-full bg-brand" />
+            <span className={cn("absolute inset-0 animate-ping-soft rounded-full", tone.dot)} />
           )}
           <span className={cn("relative size-2 rounded-full", tone.dot)} />
         </span>
-        <h2 className="font-display text-sm font-semibold">{label}</h2>
+        <h2 className="text-base font-semibold text-fg">{label}</h2>
         {/* Re-keyed so the count pops whenever it changes. */}
         <motion.span
           key={count}
           initial={{ scale: 1.35, opacity: 0.5 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 600, damping: 22 }}
-          className="ml-auto rounded-full bg-white/6 px-2 py-0.5 font-mono text-xs text-fg-secondary"
+          className={cn(
+            "ml-auto min-w-6 rounded-full px-2 py-0.5 text-center text-xs font-semibold tabular-nums",
+            tone.count,
+          )}
         >
           {count}
         </motion.span>

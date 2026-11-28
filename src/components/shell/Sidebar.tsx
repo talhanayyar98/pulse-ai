@@ -16,7 +16,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line glass px-3 py-5 md:flex">
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col bg-nav px-3 py-5 text-nav-fg md:flex">
       <div className="mb-6 flex items-center justify-between gap-2">
         <Link href="/board" className="rounded-xl px-2 py-1" aria-label="Pulse home">
           <Logo />
@@ -27,7 +27,7 @@ export function Sidebar() {
       <SidebarQuickActions />
 
       <nav aria-label="Views">
-        <p className="mb-2 px-3 font-mono text-[11px] tracking-[0.18em] text-fg-muted uppercase">
+        <p className="mb-2 px-3 text-[11px] font-semibold tracking-[0.14em] text-nav-fg-muted uppercase">
           Views
         </p>
         <ul className="flex flex-col gap-1">
@@ -40,16 +40,16 @@ export function Sidebar() {
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200",
-                    active ? "text-fg" : "text-fg-secondary hover:bg-white/5 hover:text-fg",
+                    active ? "text-nav-fg" : "text-nav-fg-muted hover:bg-white/6 hover:text-nav-fg",
                   )}
                 >
                   {active && (
                     <motion.span
                       layoutId="sidebar-active"
                       transition={springs.snappy}
-                      className="absolute inset-0 rounded-xl bg-linear-to-r from-brand/30 via-brand/12 to-accent/8 shadow-glow-brand"
+                      className="absolute inset-0 rounded-xl bg-nav-raised shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]"
                     >
-                      <span className="absolute top-2 bottom-2 left-0 w-0.75 rounded-full bg-linear-to-b from-brand-text to-accent shadow-[0_0_10px_var(--color-accent-glow)]" />
+                      <span className="absolute top-2 bottom-2 left-0 w-0.75 rounded-full bg-nav-accent" />
                     </motion.span>
                   )}
                   <motion.span
@@ -61,8 +61,8 @@ export function Sidebar() {
                       className={cn(
                         "size-5 transition-[color,translate,rotate] duration-300 ease-spring",
                         active
-                          ? "text-brand-text"
-                          : "group-hover:translate-x-0.5 group-hover:-rotate-6 group-hover:text-brand-text",
+                          ? "text-nav-accent"
+                          : "group-hover:translate-x-0.5 group-hover:-rotate-6 group-hover:text-nav-accent",
                       )}
                     />
                     <span className="transition-[translate] duration-300 ease-spring group-hover:translate-x-0.5">
@@ -77,7 +77,7 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      <div className="mt-auto border-t border-line pt-3">
+      <div className="mt-auto border-t border-nav-line pt-3">
         <UserMenu />
       </div>
     </aside>

@@ -19,17 +19,18 @@ export type TaskCardState = "idle" | "placeholder" | "lifted";
 
 const STATE_CLASS: Record<TaskCardState, string> = {
   // Hover comes from the draggable wrapper (`group`), which also takes the pointer.
-  idle: "border-line bg-surface-raised/90 group-hover:-translate-y-0.5 group-hover:border-brand/50 group-hover:shadow-[0_16px_32px_-14px_rgb(0_0_0/0.75),0_0_26px_-8px_var(--color-brand-glow)]",
-  placeholder: "border-dashed border-brand/50 bg-brand/5 opacity-40",
-  lifted:
-    "cursor-grabbing border-accent/70 bg-surface-raised shadow-[0_28px_56px_-16px_rgb(0_0_0/0.85),0_0_32px_-6px_var(--color-accent-glow)]",
+  idle: "border-line bg-surface shadow-card group-hover:-translate-y-0.5 group-hover:border-line-strong group-hover:shadow-card-hover",
+  placeholder: "border-dashed border-fg/25 bg-surface/50 opacity-50",
+  lifted: "cursor-grabbing border-line-strong bg-surface shadow-lift",
 };
 
 /** A slim edge on the most pressing cards. */
 const PRIORITY_EDGE: Partial<Record<Priority, string>> = {
-  high: "bg-accent/80",
-  urgent: "bg-danger shadow-[0_0_10px_var(--color-danger-glow)]",
+  high: "bg-warning",
+  urgent: "bg-danger",
 };
+
+const BADGE = "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium";
 
 /** Purely presentational; SortableTaskCard adds interaction. */
 export function TaskCard({
@@ -48,9 +49,9 @@ export function TaskCard({
     <div
       onPointerMove={state === "idle" ? trackSpotlight : undefined}
       className={cn(
-        "spotlight rounded-xl border p-3 text-left shadow-[0_1px_0_rgb(255_255_255/0.05)_inset] transition-[border-color,box-shadow,opacity,translate] duration-200",
+        "spotlight rounded-xl border p-3 text-left transition-[border-color,box-shadow,opacity,translate] duration-200",
         STATE_CLASS[state],
-        overdue && state === "idle" && "animate-overdue border-danger/60",
+        overdue && state === "idle" && "animate-overdue border-danger/40",
       )}
     >
       {edge && (
@@ -63,8 +64,8 @@ export function TaskCard({
         <PriorityIcon priority={task.priority} className="mt-0.5" />
         <span
           className={cn(
-            "text-sm leading-snug font-medium",
-            done && "text-fg-secondary line-through decoration-success/70",
+            "font-display text-[15px] leading-snug font-medium",
+            done && "text-fg-secondary line-through decoration-success/60",
           )}
         >
           {task.title}
@@ -74,15 +75,20 @@ export function TaskCard({
       {(task.labels.length > 0 || due || task.subtasks.length > 0) && (
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
           {task.labels.map((label) => (
-            <span key={label} className={cn("rounded-md px-1.5 py-0.5", labelTone(label).chip)}>
+            <span key={label} className={cn(BADGE, labelTone(label).chip)}>
               {label}
             </span>
           ))}
           {due && (
             <span
               className={cn(
-                "inline-flex items-center gap-1 font-mono",
-                overdue ? "text-danger" : dueSoon ? "text-warning" : "text-fg-secondary",
+                BADGE,
+                "tabular-nums",
+                overdue
+                  ? "bg-danger/10 text-danger"
+                  : dueSoon
+                    ? "bg-warning/10 text-warning"
+                    : "bg-sunken text-fg-secondary",
               )}
             >
               <ClockIcon className="size-3.5" />
@@ -93,8 +99,8 @@ export function TaskCard({
           {task.subtasks.length > 0 && (
             <span
               className={cn(
-                "ml-auto inline-flex items-center gap-1 font-mono",
-                subtasksDone === task.subtasks.length ? "text-success" : "text-fg-secondary",
+                "ml-auto inline-flex items-center gap-1 tabular-nums",
+                subtasksDone === task.subtasks.length ? "text-success" : "text-fg-muted",
               )}
             >
               <SubtasksIcon className="size-3.5" />

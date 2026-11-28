@@ -4,13 +4,13 @@ import { PRIORITY_LABEL, type Priority } from "@/lib/domain/task";
 const LEVEL: Record<Priority, number> = { low: 1, medium: 2, high: 3, urgent: 4 };
 
 const TONE: Record<Priority, string> = {
-  low: "text-info",
-  medium: "text-brand-text",
-  high: "text-accent",
+  low: "text-slate",
+  medium: "text-info",
+  high: "text-warning",
   urgent: "text-danger",
 };
 
-/** Signal-strength bars, warming from cyan (low) through violet and fuchsia to rose (urgent). */
+/** Signal-strength bars, warming from slate (low) through blue and amber to rose (urgent). */
 export function PriorityIcon({
   priority,
   className,
@@ -31,7 +31,7 @@ export function PriorityIcon({
           width="2.5"
           height={(bar + 1) * 3}
           rx="1"
-          className={bar < level ? "fill-current" : "fill-white/15"}
+          className={bar < level ? "fill-current" : "fill-fg/12"}
         />
       ))}
     </svg>

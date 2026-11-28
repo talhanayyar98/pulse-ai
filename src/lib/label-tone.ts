@@ -1,13 +1,15 @@
 /**
  * Each label keeps one colour everywhere (cards, filters, drawer), picked from its name.
- * Danger is left out so a label never reads as "overdue". Text colours meet AA on the tints.
+ * Danger and warning are left out so a label never reads as "overdue" or "due soon".
+ * Text colours meet AA on the tints (tests/unit/tokens.test.ts).
  */
-const LABEL_TONES = [
-  { chip: "bg-brand/15 text-brand-text", text: "text-brand-text" },
-  { chip: "bg-accent/12 text-accent", text: "text-accent" },
-  { chip: "bg-info/12 text-info", text: "text-info" },
-  { chip: "bg-success/12 text-success", text: "text-success" },
-  { chip: "bg-warning/12 text-warning", text: "text-warning" },
+export const LABEL_TONES = [
+  { chip: "bg-info/10 text-info", text: "text-info" },
+  { chip: "bg-teal/10 text-teal", text: "text-teal" },
+  { chip: "bg-success/10 text-success", text: "text-success" },
+  { chip: "bg-progress/10 text-progress", text: "text-progress" },
+  { chip: "bg-brand-text/10 text-brand-text", text: "text-brand-text" },
+  { chip: "bg-plum/10 text-plum", text: "text-plum" },
 ] as const;
 
 export type LabelTone = (typeof LABEL_TONES)[number];
