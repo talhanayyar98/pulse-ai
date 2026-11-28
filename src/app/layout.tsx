@@ -1,18 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { AmbientBackground } from "@/components/shell/AmbientBackground";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { palette } from "@/lib/theme";
 import "./globals.css";
 
-// opsz lets the browser pick Fraunces's optical size: crisper small titles, finer large headings.
-const display = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-});
+// Bebas Neue ships a single upright weight, all capitals.
+const display = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-bebas-neue" });
 const sans = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 

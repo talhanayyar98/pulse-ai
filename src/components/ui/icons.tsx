@@ -158,3 +158,40 @@ export function InfoIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export function SettingsIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+      <circle cx="15" cy="7" r="2.25" />
+      <circle cx="9" cy="17" r="2.25" />
+    </Icon>
+  );
+}
+
+export function RepeatIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M17 3l3 3-3 3" />
+      <path d="M4 12v-1a5 5 0 0 1 5-5h11" />
+      <path d="M7 21l-3-3 3-3" />
+      <path d="M20 12v1a5 5 0 0 1-5 5H4" />
+    </Icon>
+  );
+}
+
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M15 6l-6 6 6 6" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M9 6l6 6-6 6" />
+    </Icon>
+  );
+}

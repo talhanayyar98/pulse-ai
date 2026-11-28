@@ -1,8 +1,6 @@
 import { endOfDay, endOfMonth, endOfWeek, startOfMonth, startOfWeek, subDays } from "date-fns";
+import type { WeekStartsOn } from "./settings";
 import type { Priority, Task } from "./task";
-
-/** Monday. Becomes a user setting with the week planner (M4). */
-export const WEEK_STARTS_ON = 1;
 
 export const HORIZON_FILTERS = ["all", "week", "month"] as const;
 export type HorizonFilter = (typeof HORIZON_FILTERS)[number];
@@ -49,9 +47,14 @@ function dueBetween(task: Task, start: Date, end: Date): boolean {
  * "This month": everything in "this week", plus anything planned for or due this month.
  * Overdue tasks always match: they are the most "now" of all.
  */
-export function matchesHorizon(task: Task, horizon: HorizonFilter, now: Date): boolean {
+export function matchesHorizon(
+  task: Task,
+  horizon: HorizonFilter,
+  now: Date,
+  weekStartsOn: WeekStartsOn,
+): boolean {
   if (horizon === "all" || isOverdue(task, now)) return true;
-  const options = { weekStartsOn: WEEK_STARTS_ON } as const;
+  const options = { weekStartsOn };
   const thisWeek =
     task.horizon === "week" || dueBetween(task, startOfWeek(now, options), endOfWeek(now, options));
   if (horizon === "week") return thisWeek;
@@ -60,8 +63,13 @@ export function matchesHorizon(task: Task, horizon: HorizonFilter, now: Date): b
   );
 }
 
-export function matchesFilters(task: Task, filters: BoardFilters, now: Date): boolean {
-  if (!matchesHorizon(task, filters.horizon, now)) return false;
+export function matchesFilters(
+  task: Task,
+  filters: BoardFilters,
+  now: Date,
+  weekStartsOn: WeekStartsOn,
+): boolean {
+  if (!matchesHorizon(task, filters.horizon, now, weekStartsOn)) return false;
   if (filters.priorities.length > 0 && !filters.priorities.includes(task.priority)) return false;
   if (filters.labels.length > 0) {
     const own = new Set(task.labels.map((label) => label.toLowerCase()));

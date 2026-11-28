@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { createdByCompletion, nextOccurrenceTask } from "@/lib/domain/series";
 import {
   applyTaskPatch,
   createTask,
@@ -11,10 +12,12 @@ import {
   type TaskDraft,
   type TaskPatch,
 } from "@/lib/domain/task";
+import { formatOccurrence } from "@/lib/recurrence-label";
 import { useToasts } from "@/lib/stores/toasts";
 import { api } from "./api";
 import { usePendingTasks, withPending } from "./pending";
 import { useSession } from "./session";
+import { cachedSettings } from "./settings";
 
 export const tasksKey = ["tasks"] as const;
 
@@ -82,6 +85,30 @@ export function useTaskActions() {
       save(task);
     };
 
+    /**
+     * Completing a repeating task creates its next occurrence; reopening it takes back that
+     * occurrence while it is still untouched.
+     */
+    const followSeries = (before: Task, after: Task, now: Date) => {
+      if (after.status === "done") {
+        const next = nextOccurrenceTask(after, {
+          now,
+          order: orderAtTopOf(current(), "todo"),
+          weekStartsOn: cachedSettings(queryClient).weekStartsOn,
+        });
+        if (!next || find(next.id)) return;
+        commit(next);
+        pushToast({
+          title: `Next one: ${formatOccurrence(new Date(next.dueAt ?? ""), next.allDay)}`,
+          description: next.title,
+          tone: "success",
+        });
+      } else if (before.status === "done") {
+        const created = createdByCompletion(before, current());
+        if (created) commit(markTaskDeleted(created, now));
+      }
+    };
+
     return {
       create(draft: TaskDraft): Task {
         const task = createTask(draft, {
@@ -102,7 +129,10 @@ export function useTaskActions() {
           movesColumn && patch.order === undefined && patch.status
             ? { ...patch, order: orderAtTopOf(current(), patch.status) }
             : patch;
-        commit(applyTaskPatch(task, placed, new Date()));
+        const now = new Date();
+        const updated = applyTaskPatch(task, placed, now);
+        commit(updated);
+        if (updated.status !== task.status) followSeries(task, updated, now);
       },
 
       remove(id: string): void {
@@ -110,5 +140,5 @@ export function useTaskActions() {
         if (task) commit(markTaskDeleted(task, new Date()));
       },
     };
-  }, [queryClient, save]);
+  }, [queryClient, save, pushToast]);
 }

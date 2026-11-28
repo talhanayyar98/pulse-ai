@@ -22,6 +22,7 @@ import { useUi } from "@/lib/stores/ui";
 import { DescriptionField } from "./fields/DescriptionField";
 import { DueField } from "./fields/DueField";
 import { LabelsField } from "./fields/LabelsField";
+import { RepeatField } from "./fields/RepeatField";
 import { SubtaskList } from "./fields/SubtaskList";
 import { TitleField } from "./fields/TitleField";
 import { PriorityIcon } from "./PriorityIcon";
@@ -147,6 +148,11 @@ function TaskDetails({
             <DueField due={task} onCommit={(due) => update(due)} />
           </dd>
 
+          <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1">Repeat</dt>
+          <dd>
+            <RepeatField task={task} onChange={update} />
+          </dd>
+
           <dt className="mt-3 text-fg-secondary sm:mt-0 sm:self-start sm:pt-1">Labels</dt>
           <dd>
             <LabelsField
@@ -161,7 +167,7 @@ function TaskDetails({
           className="mt-8 animate-fade-up [animation-delay:120ms]"
           aria-labelledby="subtasks-heading"
         >
-          <h3 id="subtasks-heading" className="mb-2 text-sm font-semibold">
+          <h3 id="subtasks-heading" className="mb-2 text-lg leading-none">
             Subtasks
           </h3>
           <SubtaskList subtasks={task.subtasks} onChange={(subtasks) => update({ subtasks })} />

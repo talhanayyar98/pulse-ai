@@ -24,7 +24,7 @@ export function DescriptionField({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Description</h3>
+        <h3 className="text-lg leading-none">Description</h3>
         <Segmented
           label="Description mode"
           value={mode}

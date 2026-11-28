@@ -30,10 +30,10 @@ export default async function SignInPage() {
         </div>
         <div className="p-8">
           <Logo className="text-fg" />
-          <h1 className="mt-10 text-4xl leading-tight font-semibold text-fg">
+          <h1 className="mt-10 text-6xl leading-[0.95] text-fg">
             Your tasks,
             <br />
-            <em className="font-normal text-brand-text">with a pulse.</em>
+            <em className="text-brand-text not-italic">with a pulse.</em>
           </h1>
           <p className="mt-3 text-sm text-fg-secondary">
             Sign in to sync your board, plans and reminders across every device.

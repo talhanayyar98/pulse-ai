@@ -3,8 +3,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { connectDb } from "@/lib/db/connect";
 import { ActivityEventModel } from "@/lib/db/models/activity-event";
 import { TaskModel } from "@/lib/db/models/task";
+import { nextOccurrenceTask } from "@/lib/domain/series";
 import { applyTaskPatch, createTask, markTaskDeleted, type Task } from "@/lib/domain/task";
 import { HttpError } from "@/lib/server/errors";
+import { toTaskDoc } from "@/lib/server/task-mapper";
 import { listTasks, putTask } from "@/lib/server/task-service";
 
 const alice = "user-alice";
@@ -98,5 +100,33 @@ describe("putTask", () => {
     await Promise.all(versions.map((version) => putTask(alice, version, serverNow)));
 
     expect((await listTasks(alice))[0]?.title).toBe("Version 5");
+  });
+
+  it("stores a repeating task and its next occurrence under the predictable id", async () => {
+    const repeating = applyTaskPatch(
+      newTask("Water the plants"),
+      {
+        dueAt: "2026-11-30T09:00:00.000Z",
+        recurrence: { freq: "weekly", interval: 2, byWeekday: [1, 4] },
+      },
+      minutes(1),
+    );
+    const next = nextOccurrenceTask(repeating, { now: minutes(2), order: "a1", weekStartsOn: 1 });
+    if (!next) throw new Error("expected a next occurrence");
+
+    await putTask(alice, repeating, serverNow);
+    await putTask(alice, next, serverNow);
+
+    const stored = await listTasks(alice);
+    expect(stored.find((task) => task.id === repeating.id)).toEqual(repeating);
+    expect(stored.find((task) => task.id === `${repeating.id}:2026-12-03`)).toEqual(next);
+  });
+
+  it("reads tasks stored before recurrence existed as not repeating", async () => {
+    const task = newTask();
+    await TaskModel.create(toTaskDoc(task, alice));
+    await TaskModel.updateOne({ _id: task.id }, { $unset: { recurrence: 1 } });
+    expect(await TaskModel.findById(task.id).lean()).not.toHaveProperty("recurrence");
+    await expect(listTasks(alice)).resolves.toEqual([{ ...task, recurrence: null }]);
   });
 });

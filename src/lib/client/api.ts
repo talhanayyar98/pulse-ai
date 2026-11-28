@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Settings, settingsBodySchema } from "@/lib/domain/settings";
 import {
   type SyncResponse,
   syncResponseSchema,
@@ -62,5 +63,17 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ ops }),
     });
+  },
+
+  async getSettings(): Promise<Settings> {
+    return (await request("/api/settings", settingsBodySchema)).settings;
+  },
+
+  async putSettings(settings: Settings): Promise<Settings> {
+    const body = await request("/api/settings", settingsBodySchema, {
+      method: "PUT",
+      body: JSON.stringify({ settings }),
+    });
+    return body.settings;
   },
 };

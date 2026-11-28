@@ -1,4 +1,5 @@
 import { type Model, Schema, model, models } from "mongoose";
+import { type Settings, WEEK_START_DAYS } from "@/lib/domain/settings";
 
 export interface UserDoc {
   _id: string;
@@ -7,6 +8,8 @@ export interface UserDoc {
   image: string | null;
   /** Sign-in identities linked to this user (e.g. google + its account id). */
   accounts: Array<{ provider: string; providerAccountId: string }>;
+  /** Absent until the user first saves a setting; read through `readSettings`. */
+  settings?: Partial<Settings>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +27,9 @@ const userSchema = new Schema<UserDoc>(
         providerAccountId: { type: String, required: true },
       },
     ],
+    settings: {
+      weekStartsOn: { type: Number, enum: WEEK_START_DAYS },
+    },
   },
   { timestamps: true, versionKey: false },
 );

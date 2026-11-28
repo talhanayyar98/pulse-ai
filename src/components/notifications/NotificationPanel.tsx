@@ -127,7 +127,7 @@ function PanelBody({ id, placement, items, fresh, anchorRef, onClose }: Notifica
       )}
     >
       <header className="flex items-center justify-between gap-3 px-4 pt-4 pb-3">
-        <h2 className="text-lg font-semibold">Notifications</h2>
+        <h2 className="text-xl">Notifications</h2>
         <button
           type="button"
           disabled={unreadCount === 0}
@@ -186,7 +186,7 @@ function EmptyPanel({ filter }: Readonly<{ filter: Filter }>) {
       <span className="grid size-14 animate-float place-items-center rounded-2xl bg-brand/10 text-brand-text">
         <BellIcon className="size-7" />
       </span>
-      <p className="mt-4 font-display font-semibold">
+      <p className="mt-4 font-display text-xl tracking-wide">
         {filter === "unread" ? "Nothing unread" : "You're all caught up"}
       </p>
       <p className="mt-1 max-w-60 text-xs text-fg-secondary">

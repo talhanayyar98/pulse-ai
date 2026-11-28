@@ -1,15 +1,18 @@
 "use client";
 
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { type KeyboardEvent, type ReactNode, useId, useState } from "react";
 import { NAV_ITEMS } from "@/components/shell/nav";
 import { PriorityIcon } from "@/components/task/PriorityIcon";
-import { PlusIcon, SearchIcon } from "@/components/ui/icons";
+import { PlusIcon, SearchIcon, SettingsIcon } from "@/components/ui/icons";
 import { Kbd } from "@/components/ui/Kbd";
 import { Overlay } from "@/components/ui/Overlay";
 import { cn } from "@/lib/cn";
 import { useTaskActions, useTasks } from "@/lib/client/tasks";
+import { parseDayKey } from "@/lib/domain/calendar";
 import { parseQuickAdd } from "@/lib/domain/quick-add";
+import { inputsToDue } from "@/lib/due-date";
 import { labelTone } from "@/lib/label-tone";
 import { TASK_STATUS_LABEL } from "@/lib/domain/task-status";
 import { type PaletteMode, useUi } from "@/lib/stores/ui";
@@ -52,6 +55,9 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
   const { data: tasks = [] } = useTasks();
   const actions = useTaskActions();
   const openDrawer = useUi((state) => state.openDrawer);
+  const openSettings = useUi((state) => state.openSettings);
+  const dueOn = useUi((state) => state.paletteDueOn);
+  const dueDay = dueOn ? parseDayKey(dueOn) : null;
   const pushToast = useToasts((state) => state.push);
 
   const parsed = parseQuickAdd(query);
@@ -76,7 +82,10 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
             </span>
           ))}
           {parsed.priority && <PriorityIcon priority={parsed.priority} />}
-          <span className="text-fg-muted">→ {TASK_STATUS_LABEL.todo}</span>
+          <span className="text-fg-muted">
+            → {TASK_STATUS_LABEL.todo}
+            {dueDay && ` · ${format(dueDay, "EEE d MMM")}`}
+          </span>
         </span>
       ),
       run: () => {
@@ -84,8 +93,14 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
           title: parsed.title,
           labels: parsed.labels,
           ...(parsed.priority ? { priority: parsed.priority } : {}),
+          ...(dueOn ? { due: inputsToDue(dueOn, "") } : {}),
         });
-        pushToast({ title: `Added to ${TASK_STATUS_LABEL.todo}`, tone: "success" });
+        pushToast({
+          title: dueDay
+            ? `Added for ${format(dueDay, "EEE d MMM")}`
+            : `Added to ${TASK_STATUS_LABEL.todo}`,
+          tone: "success",
+        });
         onClose();
       },
     });
@@ -125,6 +140,18 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
         },
       });
     }
+    if (!needle || "settings".includes(needle)) {
+      items.push({
+        id: "settings",
+        group: "Go to",
+        icon: <SettingsIcon className="size-4 text-fg-muted" />,
+        label: "Settings",
+        run: () => {
+          onClose();
+          openSettings();
+        },
+      });
+    }
   }
 
   const active = Math.min(activeIndex, Math.max(items.length - 1, 0));
@@ -158,7 +185,13 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
           aria-controls={listId}
           aria-activedescendant={items[active] ? `${listId}-${items[active].id}` : undefined}
           aria-label={mode === "create" ? "New task" : "Search tasks and commands"}
-          placeholder={mode === "create" ? "What needs doing?" : "Search tasks, or type to create…"}
+          placeholder={
+            mode === "search"
+              ? "Search tasks, or type to create…"
+              : dueDay
+                ? `What needs doing on ${format(dueDay, "EEEE d MMMM")}?`
+                : "What needs doing?"
+          }
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
