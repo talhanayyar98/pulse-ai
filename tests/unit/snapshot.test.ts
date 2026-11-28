@@ -2,7 +2,8 @@ import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import type { ClientSession } from "@/lib/client/api";
 import { isPersistedQuery, restoreSnapshot, takeSnapshot } from "@/lib/client/offline/snapshot";
-import { sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
+import { notificationsKey, sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
+import type { SentNotification } from "@/lib/domain/notifications";
 import { DEFAULT_SETTINGS } from "@/lib/domain/settings";
 import { createTask, type Task } from "@/lib/domain/task";
 
@@ -75,9 +76,26 @@ describe("offline snapshot", () => {
     }
   });
 
-  it("only keeps the session, tasks and settings queries", () => {
+  it("only keeps the session, tasks, settings and sent notifications", () => {
     expect(isPersistedQuery(tasksKey)).toBe(true);
+    expect(isPersistedQuery(notificationsKey)).toBe(true);
     expect(isPersistedQuery(["tasks", "archived"])).toBe(false);
-    expect(isPersistedQuery(["notifications"])).toBe(false);
+    expect(isPersistedQuery(["activity"])).toBe(false);
+  });
+
+  it("brings back the reminders already sent, for the notification centre", () => {
+    const sent: SentNotification = {
+      id: "reminder:abc",
+      kind: "reminder",
+      taskId: task.id,
+      title: "Book flights",
+      body: "Due Today 12:00",
+      createdAt: "2026-12-01T11:00:00.000Z",
+    };
+    const client = new QueryClient();
+    client.setQueryData(notificationsKey, [sent]);
+    const restored = new QueryClient();
+    restoreSnapshot(restored, stored(takeSnapshot(client, "user-alice")));
+    expect(restored.getQueryData(notificationsKey)).toEqual([sent]);
   });
 });

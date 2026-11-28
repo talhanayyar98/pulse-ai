@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BoardView } from "@/components/board/BoardView";
-import { NewTaskFromUrl } from "@/components/board/NewTaskFromUrl";
+import { BoardUrlActions } from "@/components/board/BoardUrlActions";
 import { OverdueBadge } from "@/components/shell/OverdueBadge";
 import { ViewHeader } from "@/components/shell/ViewHeader";
 
@@ -16,7 +16,7 @@ export default function BoardPage() {
         aside={<OverdueBadge variant="pill" />}
       />
       <Suspense>
-        <NewTaskFromUrl />
+        <BoardUrlActions />
       </Suspense>
       <BoardView />
     </>

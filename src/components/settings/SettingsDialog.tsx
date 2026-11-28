@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { XIcon } from "@/components/ui/icons";
 import { Overlay } from "@/components/ui/Overlay";
 import { Segmented } from "@/components/ui/Segmented";
+import { type PushState, usePush } from "@/lib/client/push";
 import { deviceTimeZone } from "@/lib/client/reminders";
 import { useSaveSettings, useSettings } from "@/lib/client/settings";
 import { toggleOffset } from "@/lib/domain/reminders";
@@ -72,6 +73,7 @@ function SettingsBody({ onClose }: Readonly<{ onClose: () => void }>) {
       </Section>
 
       <ReminderSettings settings={settings} save={save} disabled={!online} />
+      <DeviceNotifications />
     </div>
   );
 }
@@ -188,6 +190,42 @@ function ReminderSettings({
             </Button>
           )}
         </div>
+      </Row>
+    </Section>
+  );
+}
+
+const DEVICE_STATUS: Record<PushState, string> = {
+  checking: "Checking…",
+  on: "On: reminders arrive even when Pulse is closed.",
+  off: "Off: reminders show only while Pulse is open.",
+  prompt: "Off: reminders show only while Pulse is open.",
+  denied:
+    "Blocked in this browser's site settings. Allow notifications for Pulse there, then reload.",
+  unsupported:
+    "This browser can't receive notifications from Pulse. In Safari on iPhone and iPad, add Pulse to the Home Screen first.",
+  unconfigured: "This server isn't set up to send notifications (it has no VAPID keys).",
+};
+
+function DeviceNotifications() {
+  const state = usePush((store) => store.state);
+  const busy = usePush((store) => store.busy);
+  const { enable, disable } = usePush.getState();
+  const online = useOnline();
+
+  return (
+    <Section title="Notifications">
+      <Row title="On this device" hint={DEVICE_STATUS[state]}>
+        {(state === "prompt" || state === "off") && (
+          <Button variant="primary" size="sm" disabled={busy || !online} onClick={enable}>
+            Turn on
+          </Button>
+        )}
+        {state === "on" && (
+          <Button size="sm" disabled={busy || !online} onClick={disable}>
+            Turn off
+          </Button>
+        )}
       </Row>
     </Section>
   );

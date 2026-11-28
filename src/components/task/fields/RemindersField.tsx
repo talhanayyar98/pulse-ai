@@ -3,6 +3,7 @@
 import { addHours, format, isValid, parse, startOfHour } from "date-fns";
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { PushNotice } from "@/components/notifications/PushNotice";
 import { OffsetToggles } from "@/components/reminders/OffsetToggles";
 import { Button } from "@/components/ui/Button";
 import { PlusIcon, XIcon } from "@/components/ui/icons";
@@ -82,6 +83,7 @@ export function RemindersField({
           </>
         )}
       </p>
+      {upcoming.length > 0 && <PushNotice />}
     </div>
   );
 }
