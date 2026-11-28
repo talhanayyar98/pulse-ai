@@ -13,6 +13,8 @@ import { createTask, type Task } from "@/lib/domain/task";
 
 // Wednesday 2 Dec 2026, 12:00 in Europe/London (UTC in winter). Week: Mon 30 Nov – Sun 6 Dec.
 const now = new Date("2026-12-02T12:00:00.000Z");
+const MONDAY = 1;
+const SUNDAY = 0;
 
 function task(overrides: Partial<Task> = {}): Task {
   const base = createTask(
@@ -48,24 +50,42 @@ describe("isOverdue / isDueSoon", () => {
 
 describe("matchesHorizon", () => {
   it("matches this week by planning horizon or by due date", () => {
-    expect(matchesHorizon(task({ horizon: "week" }), "week", now)).toBe(true);
-    expect(matchesHorizon(task({ dueAt: "2026-12-06T18:00:00.000Z" }), "week", now)).toBe(true);
-    expect(matchesHorizon(task({ dueAt: "2026-12-08T09:00:00.000Z" }), "week", now)).toBe(false);
-    expect(matchesHorizon(task({ horizon: "month" }), "week", now)).toBe(false);
+    expect(matchesHorizon(task({ horizon: "week" }), "week", now, MONDAY)).toBe(true);
+    expect(matchesHorizon(task({ dueAt: "2026-12-06T18:00:00.000Z" }), "week", now, MONDAY)).toBe(
+      true,
+    );
+    expect(matchesHorizon(task({ dueAt: "2026-12-08T09:00:00.000Z" }), "week", now, MONDAY)).toBe(
+      false,
+    );
+    expect(matchesHorizon(task({ horizon: "month" }), "week", now, MONDAY)).toBe(false);
+  });
+
+  it("follows the user's first day of the week", () => {
+    // Sun 6 Dec closes a Monday-first week but opens the next Sunday-first one (29 Nov – 5 Dec).
+    const sunday = task({ dueAt: "2026-12-06T09:00:00.000Z" });
+    expect(matchesHorizon(sunday, "week", now, MONDAY)).toBe(true);
+    expect(matchesHorizon(sunday, "week", now, SUNDAY)).toBe(false);
+    const saturday = task({ dueAt: "2026-12-05T09:00:00.000Z" });
+    expect(matchesHorizon(saturday, "week", now, MONDAY)).toBe(true);
+    expect(matchesHorizon(saturday, "week", now, SUNDAY)).toBe(true);
   });
 
   it("makes this month a superset of this week", () => {
-    expect(matchesHorizon(task({ horizon: "week" }), "month", now)).toBe(true);
-    expect(matchesHorizon(task({ horizon: "month" }), "month", now)).toBe(true);
-    expect(matchesHorizon(task({ dueAt: "2026-12-28T09:00:00.000Z" }), "month", now)).toBe(true);
-    expect(matchesHorizon(task({ dueAt: "2027-01-04T09:00:00.000Z" }), "month", now)).toBe(false);
-    expect(matchesHorizon(task(), "month", now)).toBe(false);
+    expect(matchesHorizon(task({ horizon: "week" }), "month", now, MONDAY)).toBe(true);
+    expect(matchesHorizon(task({ horizon: "month" }), "month", now, MONDAY)).toBe(true);
+    expect(matchesHorizon(task({ dueAt: "2026-12-28T09:00:00.000Z" }), "month", now, MONDAY)).toBe(
+      true,
+    );
+    expect(matchesHorizon(task({ dueAt: "2027-01-04T09:00:00.000Z" }), "month", now, MONDAY)).toBe(
+      false,
+    );
+    expect(matchesHorizon(task(), "month", now, MONDAY)).toBe(false);
   });
 
   it("always includes overdue tasks", () => {
     const overdue = task({ dueAt: "2026-10-01T09:00:00.000Z" });
-    expect(matchesHorizon(overdue, "week", now)).toBe(true);
-    expect(matchesHorizon(overdue, "month", now)).toBe(true);
+    expect(matchesHorizon(overdue, "week", now, MONDAY)).toBe(true);
+    expect(matchesHorizon(overdue, "month", now, MONDAY)).toBe(true);
   });
 });
 
@@ -77,23 +97,23 @@ describe("matchesFilters", () => {
 
   it("matches any of the selected priorities", () => {
     const f = filters({ priorities: ["high", "urgent"] });
-    expect(matchesFilters(task({ priority: "urgent" }), f, now)).toBe(true);
-    expect(matchesFilters(task({ priority: "low" }), f, now)).toBe(false);
+    expect(matchesFilters(task({ priority: "urgent" }), f, now, MONDAY)).toBe(true);
+    expect(matchesFilters(task({ priority: "low" }), f, now, MONDAY)).toBe(false);
   });
 
   it("matches any of the selected labels, ignoring case", () => {
     const f = filters({ labels: ["Home", "errands"] });
-    expect(matchesFilters(task({ labels: ["home"] }), f, now)).toBe(true);
-    expect(matchesFilters(task({ labels: ["work"] }), f, now)).toBe(false);
-    expect(matchesFilters(task(), f, now)).toBe(false);
+    expect(matchesFilters(task({ labels: ["home"] }), f, now, MONDAY)).toBe(true);
+    expect(matchesFilters(task({ labels: ["work"] }), f, now, MONDAY)).toBe(false);
+    expect(matchesFilters(task(), f, now, MONDAY)).toBe(false);
   });
 
   it("combines horizon, priority and label filters with AND", () => {
     const f = filters({ horizon: "week", priorities: ["high"], labels: ["work"] });
     expect(
-      matchesFilters(task({ horizon: "week", priority: "high", labels: ["work"] }), f, now),
+      matchesFilters(task({ horizon: "week", priority: "high", labels: ["work"] }), f, now, MONDAY),
     ).toBe(true);
-    expect(matchesFilters(task({ horizon: "week", priority: "high" }), f, now)).toBe(false);
+    expect(matchesFilters(task({ horizon: "week", priority: "high" }), f, now, MONDAY)).toBe(false);
   });
 
   it("reports whether any filter is active", () => {

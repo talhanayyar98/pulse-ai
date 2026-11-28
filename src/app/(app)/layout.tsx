@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CommandPalette } from "@/components/command/CommandPalette";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { GlobalShortcuts } from "@/components/shell/GlobalShortcuts";
 import { MobileTopBar } from "@/components/shell/MobileTopBar";
@@ -36,6 +37,7 @@ export default function AppLayout({ children }: Readonly<{ children: ReactNode }
       <GlobalShortcuts />
       <CommandPalette />
       <TaskDrawer />
+      <SettingsDialog />
       <Toaster />
     </>
   );

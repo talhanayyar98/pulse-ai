@@ -2,12 +2,16 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-import { SignOutIcon } from "@/components/ui/icons";
+import { SettingsIcon, SignOutIcon } from "@/components/ui/icons";
 import { signOutUser } from "@/lib/auth-actions";
 import { cn } from "@/lib/cn";
 import { usePendingTasks } from "@/lib/client/pending";
 import { useSession } from "@/lib/client/session";
 import { useNotificationState } from "@/lib/stores/notifications";
+import { useUi } from "@/lib/stores/ui";
+
+const NAV_ICON_BUTTON =
+  "group grid size-8 place-items-center rounded-lg text-nav-fg-muted transition-colors hover:bg-white/8 hover:text-nav-fg";
 
 function initials(name: string): string {
   return name
@@ -20,6 +24,7 @@ function initials(name: string): string {
 export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
+  const openSettings = useUi((state) => state.openSettings);
   if (!session) return null;
 
   const name = session.user.name ?? session.user.email ?? "You";
@@ -57,24 +62,30 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
           )}
         </div>
       )}
-      <form
-        action={async () => {
-          // Drop this user's cached data before the next person signs in on this device.
-          queryClient.clear();
-          usePendingTasks.getState().clear();
-          useNotificationState.getState().clear();
-          await signOutUser();
-        }}
-      >
+      <div className="flex items-center gap-0.5">
         <button
-          type="submit"
-          aria-label="Sign out"
-          title="Sign out"
-          className="group grid size-8 place-items-center rounded-lg text-nav-fg-muted transition-colors hover:bg-white/8 hover:text-nav-fg"
+          type="button"
+          aria-label="Settings"
+          title="Settings"
+          onClick={openSettings}
+          className={NAV_ICON_BUTTON}
         >
-          <SignOutIcon className="size-4 transition-transform duration-300 ease-spring group-hover:translate-x-0.5" />
+          <SettingsIcon className="size-4 transition-transform duration-300 ease-spring group-hover:rotate-12" />
         </button>
-      </form>
+        <form
+          action={async () => {
+            // Drop this user's cached data before the next person signs in on this device.
+            queryClient.clear();
+            usePendingTasks.getState().clear();
+            useNotificationState.getState().clear();
+            await signOutUser();
+          }}
+        >
+          <button type="submit" aria-label="Sign out" title="Sign out" className={NAV_ICON_BUTTON}>
+            <SignOutIcon className="size-4 transition-transform duration-300 ease-spring group-hover:translate-x-0.5" />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

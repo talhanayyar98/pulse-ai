@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { useWeekStartsOn } from "@/lib/client/settings";
 import { useTaskActions, useTasks } from "@/lib/client/tasks";
 import { hasActiveFilters, matchesFilters, splitDoneTasks } from "@/lib/domain/filters";
 import { normalizeLabels, type Task, tasksInColumn } from "@/lib/domain/task";
@@ -24,6 +25,7 @@ export function BoardView() {
   const actions = useTaskActions();
   const filters = useBoardFilters((state) => state.filters);
   const now = useNow();
+  const weekStartsOn = useWeekStartsOn();
 
   // Saved filters are applied after hydration (the page itself is static).
   useEffect(() => {
@@ -31,8 +33,8 @@ export function BoardView() {
   }, []);
 
   const visible = useMemo(
-    () => tasks.filter((task) => matchesFilters(task, filters, now)),
-    [tasks, filters, now],
+    () => tasks.filter((task) => matchesFilters(task, filters, now, weekStartsOn)),
+    [tasks, filters, now, weekStartsOn],
   );
   const [showOlderDone, setShowOlderDone] = useState(false);
   const olderDone = useMemo(

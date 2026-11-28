@@ -14,10 +14,15 @@ interface UiState {
   palette: PaletteMode | null;
   /** As drawerSession; also guarantees each opening starts with an empty input. */
   paletteSession: number;
+  settingsOpen: boolean;
+  /** As drawerSession, for the settings dialog. */
+  settingsSession: number;
   openDrawer: (taskId: string) => void;
   closeDrawer: () => void;
   openPalette: (mode: PaletteMode) => void;
   closePalette: () => void;
+  openSettings: () => void;
+  closeSettings: () => void;
 }
 
 export const useUi = create<UiState>()((set) => ({
@@ -25,10 +30,15 @@ export const useUi = create<UiState>()((set) => ({
   drawerSession: 0,
   palette: null,
   paletteSession: 0,
+  settingsOpen: false,
+  settingsSession: 0,
   openDrawer: (taskId) =>
     set((state) => ({ drawerTaskId: taskId, drawerSession: state.drawerSession + 1 })),
   closeDrawer: () => set({ drawerTaskId: null }),
   openPalette: (mode) =>
     set((state) => ({ palette: mode, paletteSession: state.paletteSession + 1 })),
   closePalette: () => set({ palette: null }),
+  openSettings: () =>
+    set((state) => ({ settingsOpen: true, settingsSession: state.settingsSession + 1 })),
+  closeSettings: () => set({ settingsOpen: false }),
 }));

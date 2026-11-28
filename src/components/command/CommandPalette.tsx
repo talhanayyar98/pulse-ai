@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { type KeyboardEvent, type ReactNode, useId, useState } from "react";
 import { NAV_ITEMS } from "@/components/shell/nav";
 import { PriorityIcon } from "@/components/task/PriorityIcon";
-import { PlusIcon, SearchIcon } from "@/components/ui/icons";
+import { PlusIcon, SearchIcon, SettingsIcon } from "@/components/ui/icons";
 import { Kbd } from "@/components/ui/Kbd";
 import { Overlay } from "@/components/ui/Overlay";
 import { cn } from "@/lib/cn";
@@ -52,6 +52,7 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
   const { data: tasks = [] } = useTasks();
   const actions = useTaskActions();
   const openDrawer = useUi((state) => state.openDrawer);
+  const openSettings = useUi((state) => state.openSettings);
   const pushToast = useToasts((state) => state.push);
 
   const parsed = parseQuickAdd(query);
@@ -122,6 +123,18 @@ function PaletteBody({ mode, onClose }: Readonly<{ mode: PaletteMode; onClose: (
         run: () => {
           onClose();
           router.push(view.href);
+        },
+      });
+    }
+    if (!needle || "settings".includes(needle)) {
+      items.push({
+        id: "settings",
+        group: "Go to",
+        icon: <SettingsIcon className="size-4 text-fg-muted" />,
+        label: "Settings",
+        run: () => {
+          onClose();
+          openSettings();
         },
       });
     }
