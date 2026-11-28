@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { compareOrder, isValidOrderKey, keyBetweenNeighbours } from "./ordering";
 import { recurrenceSchema } from "./recurrence";
+import { reminderRulesSchema } from "./reminders";
 import { taskIdSchema } from "./task-id";
 import { TASK_STATUSES, type TaskStatus } from "./task-status";
 
@@ -53,6 +54,8 @@ export const taskSchema = z
     horizon: z.enum(HORIZONS),
     /** Defaults to null so snapshots from clients older than recurrence stay valid. */
     recurrence: recurrenceSchema.nullable().default(null),
+    /** The task's own reminders; null uses the user's default ones (also for older clients). */
+    reminders: reminderRulesSchema.nullable().default(null),
     subtasks: z.array(subtaskSchema).max(LIMITS.subtasks),
     statusChangedAt: timestamp,
     completedAt: timestamp.nullable(),
@@ -81,6 +84,7 @@ export type TaskPatch = Partial<
     | "allDay"
     | "horizon"
     | "recurrence"
+    | "reminders"
     | "subtasks"
   >
 >;
@@ -134,6 +138,7 @@ export function createTask(
     allDay: draft.due?.allDay ?? false,
     horizon: "none",
     recurrence: null,
+    reminders: null,
     subtasks: [],
     statusChangedAt: createdAt,
     completedAt: status === "done" ? createdAt : null,

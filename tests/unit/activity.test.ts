@@ -56,6 +56,13 @@ describe("deriveActivity", () => {
     ]);
   });
 
+  it("logs a change of reminders as an update", () => {
+    const quiet = applyTaskPatch(base, { reminders: [] }, later);
+    expect(deriveActivity(base, quiet)).toEqual([
+      { type: "updated", payload: { fields: ["reminders"] } },
+    ]);
+  });
+
   it("ignores pure reordering", () => {
     expect(deriveActivity(base, applyTaskPatch(base, { order: "a1" }, later))).toEqual([]);
   });

@@ -29,6 +29,11 @@ const userSchema = new Schema<UserDoc>(
     ],
     settings: {
       weekStartsOn: { type: Number, enum: WEEK_START_DAYS },
+      timeZone: { type: String },
+      // Mixed rather than an array path: Mongoose would default an array to [] on insert,
+      // which reads as "no default reminders" instead of the built-in default.
+      defaultReminders: { type: Schema.Types.Mixed },
+      allDayReminderTime: { type: String },
     },
   },
   { timestamps: true, versionKey: false },

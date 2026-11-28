@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ClientSession } from "@/lib/client/api";
 import { isPersistedQuery, restoreSnapshot, takeSnapshot } from "@/lib/client/offline/snapshot";
 import { sessionKey, settingsKey, tasksKey } from "@/lib/client/query-keys";
+import { DEFAULT_SETTINGS } from "@/lib/domain/settings";
 import { createTask, type Task } from "@/lib/domain/task";
 
 const session: ClientSession = {
@@ -18,7 +19,7 @@ function filledClient(): QueryClient {
   const client = new QueryClient();
   client.setQueryData(sessionKey, session, { updatedAt: 1_000 });
   client.setQueryData(tasksKey, [task], { updatedAt: 2_000 });
-  client.setQueryData(settingsKey, { weekStartsOn: 0 }, { updatedAt: 3_000 });
+  client.setQueryData(settingsKey, { ...DEFAULT_SETTINGS, weekStartsOn: 0 }, { updatedAt: 3_000 });
   return client;
 }
 
@@ -33,11 +34,19 @@ describe("offline snapshot", () => {
     expect(restoreSnapshot(client, snapshot)).toBe("user-alice");
     expect(client.getQueryData(sessionKey)).toEqual(session);
     expect(client.getQueryData<Task[]>(tasksKey)).toEqual([task]);
-    expect(client.getQueryData(settingsKey)).toEqual({ weekStartsOn: 0 });
+    expect(client.getQueryData(settingsKey)).toEqual({ ...DEFAULT_SETTINGS, weekStartsOn: 0 });
     expect(client.getQueryState(tasksKey)).toMatchObject({
       dataUpdatedAt: 2_000,
       isInvalidated: true,
     });
+  });
+
+  it("fills in settings saved before a field existed", () => {
+    const client = new QueryClient();
+    client.setQueryData(settingsKey, { weekStartsOn: 6 });
+    const restored = new QueryClient();
+    restoreSnapshot(restored, stored(takeSnapshot(client, "user-alice")));
+    expect(restored.getQueryData(settingsKey)).toEqual({ ...DEFAULT_SETTINGS, weekStartsOn: 6 });
   });
 
   it("keeps neither a signed-out session nor queries that never loaded", () => {

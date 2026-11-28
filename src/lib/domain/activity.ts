@@ -12,7 +12,9 @@ export type ActivityEvent =
   | { type: "reopened"; payload: { to: TaskStatus } }
   | { type: "rescheduled"; payload: { from: string | null; to: string | null } }
   | { type: "updated"; payload: { fields: UpdatableField[] } }
-  | { type: "deleted"; payload: Record<string, never> };
+  | { type: "deleted"; payload: Record<string, never> }
+  /** Logged by the worker once per due date that passes with the task still open. */
+  | { type: "overdue"; payload: { dueAt: string } };
 
 export type ActivityType = ActivityEvent["type"];
 
@@ -23,6 +25,7 @@ const UPDATABLE_FIELDS = [
   "labels",
   "horizon",
   "recurrence",
+  "reminders",
   "subtasks",
 ] as const satisfies readonly (keyof Task)[];
 type UpdatableField = (typeof UPDATABLE_FIELDS)[number];

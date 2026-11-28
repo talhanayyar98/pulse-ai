@@ -1,5 +1,6 @@
 import { type Model, Schema, model, models } from "mongoose";
 import type { Recurrence } from "@/lib/domain/recurrence";
+import type { ReminderRule } from "@/lib/domain/reminders";
 import { HORIZONS, PRIORITIES, type Horizon, type Priority } from "@/lib/domain/task";
 import { TASK_STATUSES, type TaskStatus } from "@/lib/domain/task-status";
 
@@ -17,6 +18,8 @@ export interface TaskDoc {
   horizon: Horizon;
   /** Absent on tasks stored before recurrence existed. */
   recurrence?: Recurrence | null;
+  /** Absent on tasks stored before reminders existed (they use the defaults). */
+  reminders?: ReminderRule[] | null;
   subtasks: Array<{ id: string; title: string; done: boolean }>;
   statusChangedAt: Date;
   completedAt: Date | null;
@@ -40,6 +43,8 @@ const taskSchema = new Schema<TaskDoc>(
     horizon: { type: String, enum: HORIZONS, required: true },
     // Validated by recurrenceSchema at the API boundary; stored as sent.
     recurrence: { type: Schema.Types.Mixed, default: null },
+    // Validated by reminderRulesSchema at the API boundary; null means "the user's defaults".
+    reminders: { type: Schema.Types.Mixed, default: null },
     subtasks: [
       {
         _id: false,
@@ -60,6 +65,8 @@ const taskSchema = new Schema<TaskDoc>(
 
 taskSchema.index({ userId: 1, status: 1, order: 1 });
 taskSchema.index({ userId: 1, dueAt: 1 });
+// The overdue sweep looks across users at what fell due recently.
+taskSchema.index({ dueAt: 1 });
 
 export const TaskModel: Model<TaskDoc> =
   (models.Task as Model<TaskDoc> | undefined) ?? model<TaskDoc>("Task", taskSchema);
