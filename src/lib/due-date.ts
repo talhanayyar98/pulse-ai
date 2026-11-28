@@ -1,3 +1,4 @@
+import { tz } from "@date-fns/tz";
 import { differenceInCalendarDays, format, isSameYear, isValid, parse, startOfDay } from "date-fns";
 import type { Task } from "@/lib/domain/task";
 
@@ -19,16 +20,21 @@ export function inputsToDue(date: string, time: string): Due {
   return isValid(at) ? { dueAt: at.toISOString(), allDay: false } : { dueAt: null, allDay: false };
 }
 
-/** Short, human label for a due date: "Today 14:30", "Tomorrow", "Fri", "3 Dec", "3 Dec 2027". */
-export function formatDue({ dueAt, allDay }: Due, now: Date): string | null {
+/**
+ * Short, human label for a due date: "Today 14:30", "Tomorrow", "Fri", "3 Dec", "3 Dec 2027".
+ * In this device's time zone, or in `timeZone` (the server words reminders in the user's).
+ */
+export function formatDue({ dueAt, allDay }: Due, now: Date, timeZone?: string): string | null {
   if (!dueAt) return null;
+  const options = timeZone ? { in: tz(timeZone) } : {};
   const due = new Date(dueAt);
-  const time = allDay ? "" : ` ${format(due, "HH:mm")}`;
-  const days = differenceInCalendarDays(due, now);
+  const time = allDay ? "" : ` ${format(due, "HH:mm", options)}`;
+  const days = differenceInCalendarDays(due, now, options);
 
   if (days === 0) return `Today${time}`;
   if (days === 1) return `Tomorrow${time}`;
   if (days === -1) return `Yesterday${time}`;
-  if (days > 1 && days < 7) return `${format(due, "EEE")}${time}`;
-  return `${format(due, isSameYear(due, now) ? "d MMM" : "d MMM yyyy")}${time}`;
+  if (days > 1 && days < 7) return `${format(due, "EEE", options)}${time}`;
+  const dateFormat = isSameYear(due, now, options) ? "d MMM" : "d MMM yyyy";
+  return `${format(due, dateFormat, options)}${time}`;
 }

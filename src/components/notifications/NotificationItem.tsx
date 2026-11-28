@@ -3,7 +3,7 @@
 import { formatDistanceStrict } from "date-fns";
 import { motion } from "motion/react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
-import { AlertIcon, CheckIcon, ClockIcon, HourglassIcon } from "@/components/ui/icons";
+import { AlertIcon, BellIcon, CheckIcon, ClockIcon, HourglassIcon } from "@/components/ui/icons";
 import type { NotificationView } from "@/lib/client/notifications";
 import { cn } from "@/lib/cn";
 import type { NotificationKind } from "@/lib/domain/notifications";
@@ -20,6 +20,7 @@ const KIND: Record<
   due_soon: { Icon: ClockIcon, avatar: "bg-warning/10 text-warning ring-warning/25" },
   stuck: { Icon: HourglassIcon, avatar: "bg-progress/10 text-progress ring-progress/25" },
   completed: { Icon: CheckIcon, avatar: "bg-success/10 text-success ring-success/25" },
+  reminder: { Icon: BellIcon, avatar: "bg-brand/10 text-brand-text ring-brand/25" },
 };
 
 function message({ kind, task, ref }: NotificationView, now: Date): ReactNode {
@@ -41,10 +42,12 @@ function message({ kind, task, ref }: NotificationView, now: Date): ReactNode {
       );
     case "completed":
       return <>You finished {title}. Nice work!</>;
+    case "reminder":
+      return <>Reminder: {title}</>;
   }
 }
 
-function detail({ kind, task }: NotificationView, now: Date): string | null {
+function detail({ kind, task, ref }: NotificationView, now: Date): string | null {
   switch (kind) {
     case "overdue":
       return `Was due ${formatDue(task, now)}`;
@@ -54,6 +57,9 @@ function detail({ kind, task }: NotificationView, now: Date): string | null {
       return "Finish it, or move it back?";
     case "completed":
       return null;
+    case "reminder":
+      if (!task.dueAt) return null;
+      return `${ref < now ? "Was due" : "Due"} ${formatDue(task, now)}`;
   }
 }
 

@@ -143,6 +143,17 @@ export function scheduledReminders(task: Task, policy: ReminderPolicy): Schedule
   });
 }
 
+/** Whether the task (as it is now) still wants this reminder: checked just before sending. */
+export function isStillScheduled(
+  task: Task,
+  policy: ReminderPolicy,
+  { ruleId, fireAt }: ScheduledReminder,
+): boolean {
+  return scheduledReminders(task, policy).some(
+    (reminder) => reminder.ruleId === ruleId && reminder.fireAt.getTime() === fireAt.getTime(),
+  );
+}
+
 /** True when a change from `previous` to `next` can move, add or remove reminder times. */
 export function affectsReminders(previous: Task | null, next: Task): boolean {
   if (previous === null) return true;

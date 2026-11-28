@@ -52,4 +52,11 @@ describe("formatDue", () => {
   it("returns null when there is no due date", () => {
     expect(formatDue({ dueAt: null, allDay: false }, now)).toBeNull();
   });
+
+  it("can word it in another time zone", () => {
+    // 01:30 on Thu 3 Dec in London is still Wed 2 Dec, 20:30, in New York.
+    const late = { dueAt: "2026-12-03T01:30:00.000Z", allDay: false };
+    expect(formatDue(late, now)).toBe("Tomorrow 01:30");
+    expect(formatDue(late, now, "America/New_York")).toBe("Today 20:30");
+  });
 });

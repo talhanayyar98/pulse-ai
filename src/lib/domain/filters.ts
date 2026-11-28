@@ -1,3 +1,4 @@
+import { tz } from "@date-fns/tz";
 import { endOfDay, endOfMonth, endOfWeek, startOfMonth, startOfWeek, subDays } from "date-fns";
 import type { WeekStartsOn } from "./settings";
 import type { Priority, Task } from "./task";
@@ -17,11 +18,15 @@ export const NO_FILTERS: BoardFilters = { horizon: "all", priorities: [], labels
 
 export const DUE_SOON_MS = 24 * 60 * 60 * 1000;
 
-/** When the task is actually due: the end of the day for all-day tasks. */
-export function deadline(task: Task): Date | null {
+/**
+ * When the task is actually due: the end of the day for all-day tasks, on this device's clock
+ * or in `timeZone` (the server's view of the user's day).
+ */
+export function deadline(task: Pick<Task, "dueAt" | "allDay">, timeZone?: string): Date | null {
   if (!task.dueAt) return null;
   const due = new Date(task.dueAt);
-  return task.allDay ? endOfDay(due) : due;
+  if (!task.allDay) return due;
+  return new Date(endOfDay(due, timeZone ? { in: tz(timeZone) } : undefined).getTime());
 }
 
 export function isOverdue(task: Task, now: Date): boolean {

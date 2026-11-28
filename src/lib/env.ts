@@ -15,4 +15,11 @@ export const env = {
   get devLoginEnabled(): boolean {
     return process.env.AUTH_DEV_LOGIN === "true";
   },
+  /** Web Push (VAPID) keys and contact; null when push is not set up, so none is sent. */
+  get vapid(): { publicKey: string; privateKey: string; subject: string } | null {
+    const publicKey = process.env.VAPID_PUBLIC_KEY;
+    const privateKey = process.env.VAPID_PRIVATE_KEY;
+    const subject = process.env.VAPID_SUBJECT;
+    return publicKey && privateKey && subject ? { publicKey, privateKey, subject } : null;
+  },
 };
