@@ -218,6 +218,35 @@ test("sign in, capture and edit a task, install and work offline", async ({ page
     ).toBeVisible();
   });
 
+  await test.step("the bell counts new notifications; opening one marks it read", async () => {
+    const bell = page.getByRole("button", { name: /^Notifications/ });
+    await expect(bell).toHaveAccessibleName(/^Notifications, \d+ new$/);
+
+    await bell.click();
+    const panel = page.getByRole("dialog", { name: "Notifications" });
+    await expect(panel).toBeVisible();
+    await expect(bell).toHaveAccessibleName("Notifications");
+    await panel
+      .getByRole("button", { name: /^Unread: Pay the electricity bill is overdue/ })
+      .click();
+    await expect(panel).toBeHidden();
+
+    const drawer = page.getByRole("dialog", { name: "Task details" });
+    await expect(drawer.getByRole("textbox", { name: "Title" })).toHaveValue(
+      "Pay the electricity bill",
+    );
+    await page.keyboard.press("Escape");
+    await expect(drawer).toBeHidden();
+    await expect(bell).toBeFocused();
+
+    await bell.click();
+    await expect(
+      panel.getByRole("button", { name: /^Pay the electricity bill is overdue/ }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
+  });
+
   await test.step("manifest is linked and served", async () => {
     const href = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(href).toBeTruthy();

@@ -7,6 +7,7 @@ import { signOutUser } from "@/lib/auth-actions";
 import { cn } from "@/lib/cn";
 import { usePendingTasks } from "@/lib/client/pending";
 import { useSession } from "@/lib/client/session";
+import { useNotificationState } from "@/lib/stores/notifications";
 
 function initials(name: string): string {
   return name
@@ -24,7 +25,12 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
   const name = session.user.name ?? session.user.email ?? "You";
 
   return (
-    <div className={cn("flex items-center gap-3", !compact && "rounded-xl px-2 py-2")}>
+    <div
+      className={cn(
+        "flex items-center gap-3",
+        !compact && "rounded-xl px-2 py-2 transition-colors duration-200 hover:bg-white/4",
+      )}
+    >
       {session.user.image ? (
         <Image
           src={session.user.image}
@@ -33,12 +39,12 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
           height={32}
           unoptimized
           referrerPolicy="no-referrer"
-          className="size-8 rounded-full border border-line-strong"
+          className="size-8 rounded-full ring-2 ring-brand/50 ring-offset-2 ring-offset-canvas"
         />
       ) : (
         <span
           aria-hidden
-          className="grid size-8 place-items-center rounded-full bg-brand-deep text-xs font-semibold text-on-brand"
+          className="grid size-8 place-items-center rounded-full bg-linear-135 from-brand-strong to-accent-deep text-xs font-semibold text-on-brand ring-2 ring-brand/40 ring-offset-2 ring-offset-canvas"
         >
           {initials(name)}
         </span>
@@ -56,6 +62,7 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
           // Drop this user's cached data before the next person signs in on this device.
           queryClient.clear();
           usePendingTasks.getState().clear();
+          useNotificationState.getState().clear();
           await signOutUser();
         }}
       >
@@ -63,9 +70,9 @@ export function UserMenu({ compact = false }: Readonly<{ compact?: boolean }>) {
           type="submit"
           aria-label="Sign out"
           title="Sign out"
-          className="grid size-8 place-items-center rounded-lg text-fg-muted transition-colors hover:bg-white/5 hover:text-fg"
+          className="group grid size-8 place-items-center rounded-lg text-fg-muted transition-colors hover:bg-danger/12 hover:text-danger"
         >
-          <SignOutIcon className="size-4" />
+          <SignOutIcon className="size-4 transition-transform duration-300 ease-spring group-hover:translate-x-0.5" />
         </button>
       </form>
     </div>

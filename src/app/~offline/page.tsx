@@ -15,7 +15,7 @@ export default function OfflinePage() {
         action={
           <Link
             href="/board"
-            className="inline-flex items-center rounded-xl bg-neon px-4 py-2.5 text-sm font-semibold text-on-neon transition-shadow hover:shadow-glow-neon"
+            className="inline-flex items-center rounded-xl bg-cta px-4 py-2.5 text-sm font-semibold text-on-brand shadow-cta transition-[box-shadow,background-position,translate] duration-300 hover:-translate-y-px hover:shadow-cta-hover"
           >
             Back to the board
           </Link>

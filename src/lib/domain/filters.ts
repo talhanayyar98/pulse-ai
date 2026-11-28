@@ -17,10 +17,10 @@ export interface BoardFilters {
 
 export const NO_FILTERS: BoardFilters = { horizon: "all", priorities: [], labels: [] };
 
-const DUE_SOON_MS = 24 * 60 * 60 * 1000;
+export const DUE_SOON_MS = 24 * 60 * 60 * 1000;
 
 /** When the task is actually due: the end of the day for all-day tasks. */
-function deadline(task: Task): Date | null {
+export function deadline(task: Task): Date | null {
   if (!task.dueAt) return null;
   const due = new Date(task.dueAt);
   return task.allDay ? endOfDay(due) : due;

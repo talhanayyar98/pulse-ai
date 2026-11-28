@@ -6,8 +6,8 @@ import { cn } from "@/lib/cn";
 import { springs } from "@/lib/motion";
 
 /**
- * Neon overdue count. "pill" reads "3 overdue" (board header); "count" is a compact number
- * for navigation items, with the full wording for screen readers.
+ * Rose overdue count. "pill" reads "3 overdue" (board header) with a pinging dot; "count" is a
+ * compact number for navigation items, with the full wording for screen readers.
  */
 export function OverdueBadge({
   variant,
@@ -24,13 +24,21 @@ export function OverdueBadge({
           exit={{ scale: 0.6, opacity: 0 }}
           transition={springs.snappy}
           className={cn(
-            "inline-flex items-center justify-center rounded-full bg-neon font-mono font-semibold text-on-neon shadow-glow-neon",
-            variant === "pill" ? "h-6 gap-1 px-2.5 text-xs" : "h-4.5 min-w-4.5 px-1 text-[10px]",
+            "inline-flex items-center justify-center rounded-full font-mono font-semibold",
+            variant === "pill"
+              ? "h-6 gap-1.5 border border-danger/45 bg-danger/12 px-2.5 text-xs text-danger shadow-glow-danger"
+              : "h-4.5 min-w-4.5 bg-danger-strong px-1 text-[10px] text-on-brand shadow-[0_0_12px_-2px_var(--color-danger-glow)]",
             className,
           )}
         >
           {variant === "pill" ? (
-            `${count} overdue`
+            <>
+              <span aria-hidden className="relative flex size-1.5">
+                <span className="absolute inset-0 animate-ping-soft rounded-full bg-danger" />
+                <span className="relative size-1.5 rounded-full bg-danger" />
+              </span>
+              {`${count} overdue`}
+            </>
           ) : (
             <>
               <span aria-hidden>{count}</span>

@@ -16,6 +16,7 @@ import {
   type TaskPatch,
 } from "@/lib/domain/task";
 import { TASK_STATUS_LABEL, TASK_STATUSES } from "@/lib/domain/task-status";
+import { cn } from "@/lib/cn";
 import { useNow } from "@/lib/hooks/use-now";
 import { useUi } from "@/lib/stores/ui";
 import { DescriptionField } from "./fields/DescriptionField";
@@ -24,6 +25,7 @@ import { LabelsField } from "./fields/LabelsField";
 import { SubtaskList } from "./fields/SubtaskList";
 import { TitleField } from "./fields/TitleField";
 import { PriorityIcon } from "./PriorityIcon";
+import { STATUS_TONE } from "./status-tone";
 
 const PRIORITY_OPTIONS = PRIORITIES.map((priority) => ({
   value: priority,
@@ -75,13 +77,20 @@ function TaskDetails({
       <header className="flex items-center gap-2 border-b border-line px-5 py-3">
         <label className="relative">
           <span className="sr-only">Status</span>
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute top-1/2 left-3 size-2 -translate-y-1/2 rounded-full",
+              STATUS_TONE[task.status].dot,
+            )}
+          />
           <select
             value={task.status}
             onChange={(event) => {
               const status = TASK_STATUSES.find((candidate) => candidate === event.target.value);
               if (status) update({ status });
             }}
-            className="appearance-none field py-1.5 pr-8 font-medium"
+            className="appearance-none field py-1.5 pr-8 pl-7 font-medium"
           >
             {TASK_STATUSES.map((status) => (
               <option key={status} value={status}>
@@ -95,17 +104,19 @@ function TaskDetails({
           variant="ghost"
           size="icon"
           aria-label="Close"
-          className="ml-auto"
+          className="group ml-auto"
           onClick={onClose}
         >
-          <XIcon className="size-5" />
+          <XIcon className="size-5 transition-transform duration-300 ease-spring group-hover:rotate-90" />
         </Button>
       </header>
 
       <div className="flex-1 overflow-y-auto px-5 py-5">
-        <TitleField value={task.title} onCommit={(title) => update({ title })} />
+        <div className="animate-fade-up">
+          <TitleField value={task.title} onCommit={(title) => update({ title })} />
+        </div>
 
-        <dl className="mt-6 grid grid-cols-1 gap-y-1.5 text-sm sm:grid-cols-[6rem_1fr] sm:items-center sm:gap-x-3 sm:gap-y-4">
+        <dl className="mt-6 grid animate-fade-up grid-cols-1 gap-y-1.5 text-sm [animation-delay:60ms] sm:grid-cols-[6rem_1fr] sm:items-center sm:gap-x-3 sm:gap-y-4">
           <dt className="text-fg-secondary">Priority</dt>
           <dd>
             <Segmented
@@ -141,14 +152,17 @@ function TaskDetails({
           </dd>
         </dl>
 
-        <section className="mt-8" aria-labelledby="subtasks-heading">
+        <section
+          className="mt-8 animate-fade-up [animation-delay:120ms]"
+          aria-labelledby="subtasks-heading"
+        >
           <h3 id="subtasks-heading" className="mb-2 text-sm font-semibold">
             Subtasks
           </h3>
           <SubtaskList subtasks={task.subtasks} onChange={(subtasks) => update({ subtasks })} />
         </section>
 
-        <section className="mt-8">
+        <section className="mt-8 animate-fade-up [animation-delay:180ms]">
           <DescriptionField
             value={task.description}
             onCommit={(description) => update({ description })}
@@ -182,7 +196,7 @@ function TaskFooter({ task, onDelete }: Readonly<{ task: Task; onDelete: () => v
       </p>
       <Button
         size="sm"
-        variant={confirming ? "secondary" : "ghost"}
+        variant={confirming ? "danger" : "ghost"}
         onClick={() => (confirming ? onDelete() : setConfirming(true))}
         onBlur={() => setConfirming(false)}
       >

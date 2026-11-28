@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Logo } from "./Logo";
 import { MobileSearchButton } from "./QuickActions";
 import { UserMenu } from "./UserMenu";
@@ -11,6 +12,7 @@ export function MobileTopBar() {
       </Link>
       <div className="flex items-center gap-1">
         <MobileSearchButton />
+        <NotificationBell placement="topbar" />
         <UserMenu compact />
       </div>
     </header>

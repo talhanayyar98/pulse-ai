@@ -3,7 +3,9 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useId, useState } from "react";
 import { XIcon } from "@/components/ui/icons";
+import { cn } from "@/lib/cn";
 import { LIMITS, normalizeLabels } from "@/lib/domain/task";
+import { labelTone } from "@/lib/label-tone";
 import { springs } from "@/lib/motion";
 
 export function LabelsField({
@@ -31,14 +33,17 @@ export function LabelsField({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={springs.snappy}
-            className="inline-flex items-center gap-1 rounded-md bg-brand/15 py-0.5 pr-0.5 pl-2 text-xs text-brand-text"
+            className={cn(
+              "inline-flex items-center gap-1 rounded-md py-0.5 pr-0.5 pl-2 text-xs",
+              labelTone(label).chip,
+            )}
           >
             {label}
             <button
               type="button"
               aria-label={`Remove label ${label}`}
               onClick={() => onChange(labels.filter((existing) => existing !== label))}
-              className="rounded p-0.5 transition-colors hover:bg-brand/25 hover:text-fg"
+              className="rounded p-0.5 transition hover:rotate-90 hover:bg-white/10 hover:text-fg"
             >
               <XIcon className="size-3" />
             </button>

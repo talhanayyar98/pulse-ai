@@ -31,10 +31,22 @@ describe("design tokens", () => {
     expect(tokens.get("brand")).toBe(palette.brand);
     expect(tokens.get("brand-deep")).toBe(palette.brandDeep);
     expect(tokens.get("brand-strong")).toBe(palette.brandStrong);
-    expect(tokens.get("neon")).toBe(palette.neon);
+    expect(tokens.get("accent")).toBe(palette.accent);
+    expect(tokens.get("accent-deep")).toBe(palette.accentDeep);
+    expect(tokens.get("on-brand")).toBe(palette.onBrand);
   });
 
-  const textOnSurfaces = ["fg", "fg-secondary", "fg-muted", "brand-text", "neon"];
+  const textOnSurfaces = [
+    "fg",
+    "fg-secondary",
+    "fg-muted",
+    "brand-text",
+    "accent",
+    "info",
+    "success",
+    "warning",
+    "danger",
+  ];
   for (const text of textOnSurfaces) {
     for (const surface of SURFACES) {
       it(`${text} on ${surface} meets WCAG AA`, () => {
@@ -44,9 +56,12 @@ describe("design tokens", () => {
   }
 
   const filledPairs = [
-    ["on-neon", "neon"],
+    // Both ends of the bg-cta gradient carry white text.
     ["on-brand", "brand-strong"],
+    ["on-brand", "accent-deep"],
     ["on-brand", "brand-deep"],
+    ["on-brand", "danger-strong"],
+    ["on-success", "success"],
   ] as const;
   for (const [text, fill] of filledPairs) {
     it(`${text} on ${fill} meets WCAG AA`, () => {

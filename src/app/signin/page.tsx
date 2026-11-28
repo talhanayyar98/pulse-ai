@@ -20,42 +20,50 @@ export default async function SignInPage() {
 
   return (
     <main className="grid min-h-dvh place-items-center px-5 py-10">
-      <div className="w-full max-w-sm rounded-3xl border border-line-strong glass p-8 shadow-lift">
-        <Logo />
-        <h1 className="mt-10 text-3xl leading-tight font-semibold">
-          Your tasks,
-          <br />
-          <span className="text-brand-text">with a pulse.</span>
-        </h1>
-        <p className="mt-3 text-sm text-fg-secondary">
-          Sign in to sync your board, plans and reminders across every device.
-        </p>
+      {/* A 1px frame of slowly turning aurora light around the card. */}
+      <div className="relative w-full max-w-sm animate-view-in overflow-hidden rounded-3xl p-px shadow-[0_30px_80px_-24px_rgb(0_0_0/0.9),0_0_80px_-30px_var(--color-brand-glow)]">
+        <div
+          aria-hidden
+          className="absolute -inset-1/2 animate-spin-slow bg-[conic-gradient(from_0deg,transparent_0%,var(--color-brand)_18%,var(--color-accent)_30%,transparent_45%,transparent_55%,var(--color-info)_72%,transparent_85%)]"
+        />
+        <div className="relative rounded-[calc(1.5rem-1px)] bg-surface/92 p-8 backdrop-blur-xl">
+          <Logo />
+          <h1 className="mt-10 text-3xl leading-tight font-semibold">
+            Your tasks,
+            <br />
+            <span className="text-gradient">with a pulse.</span>
+          </h1>
+          <p className="mt-3 text-sm text-fg-secondary">
+            Sign in to sync your board, plans and reminders across every device.
+          </p>
 
-        <div className="mt-8 flex flex-col gap-3">
-          {google && (
-            <form action={signInWithGoogle}>
-              <SubmitButton variant="secondary">
-                <GoogleMark />
-                Continue with Google
-              </SubmitButton>
-            </form>
-          )}
-          {dev && (
-            <form action={signInAsDevUser}>
-              <SubmitButton variant={google ? "ghost" : "primary"}>
-                Continue as dev user
-              </SubmitButton>
-              <p className="mt-2 text-center font-mono text-[11px] text-fg-muted">
-                Local development only
+          <div className="mt-8 flex flex-col gap-3">
+            {google && (
+              <form action={signInWithGoogle}>
+                <SubmitButton variant="secondary">
+                  <GoogleMark />
+                  Continue with Google
+                </SubmitButton>
+              </form>
+            )}
+            {dev && (
+              <form action={signInAsDevUser}>
+                <SubmitButton variant={google ? "ghost" : "primary"}>
+                  Continue as dev user
+                </SubmitButton>
+                <p className="mt-2 text-center font-mono text-[11px] text-fg-muted">
+                  Local development only
+                </p>
+              </form>
+            )}
+            {!google && !dev && (
+              <p className="rounded-xl border border-line p-4 text-sm text-fg-secondary">
+                No sign-in method is configured. Set{" "}
+                <code className="font-mono">AUTH_GOOGLE_ID</code> and{" "}
+                <code className="font-mono">AUTH_GOOGLE_SECRET</code> (see the README).
               </p>
-            </form>
-          )}
-          {!google && !dev && (
-            <p className="rounded-xl border border-line p-4 text-sm text-fg-secondary">
-              No sign-in method is configured. Set <code className="font-mono">AUTH_GOOGLE_ID</code>{" "}
-              and <code className="font-mono">AUTH_GOOGLE_SECRET</code> (see the README).
-            </p>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </main>

@@ -59,7 +59,7 @@ export function BoardView() {
 
   if (isError) {
     return (
-      <div className="mx-5 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface/70 p-4 md:mx-8">
+      <div className="mx-5 flex animate-fade-up items-center justify-between gap-4 rounded-2xl border border-danger/40 bg-danger/8 p-4 md:mx-8">
         <p className="text-sm text-fg-secondary">Couldn&apos;t load your tasks.</p>
         <Button size="sm" onClick={() => void refetch()}>
           Try again
@@ -76,7 +76,7 @@ export function BoardView() {
         loading={isPending}
         onMove={(taskId, status, order) => actions.update(taskId, { status, order })}
         renderEmpty={(status) => (
-          <p className="grid h-36 place-items-center rounded-xl border border-dashed border-line px-4 text-center text-sm text-fg-muted">
+          <p className="grid h-36 animate-fade-up place-items-center rounded-xl border border-dashed border-line bg-white/2 px-4 text-center text-sm text-fg-muted transition-colors duration-300 hover:border-brand/40 hover:text-fg-secondary">
             {filtering && tasks.some((task) => task.status === status)
               ? "Nothing here matches your filters."
               : EMPTY_COLUMN_COPY[status]}

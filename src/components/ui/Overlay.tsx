@@ -18,24 +18,24 @@ function setBackgroundInert(open: boolean) {
 
 const PANEL_MOTION: Record<"dialog" | "drawer", HTMLMotionProps<"div">> = {
   dialog: {
-    initial: { opacity: 0, y: -10, scale: 0.98 },
-    animate: { opacity: 1, y: 0, scale: 1 },
-    exit: { opacity: 0, y: -6, scale: 0.98 },
-    transition: { type: "spring", stiffness: 520, damping: 36 },
+    initial: { opacity: 0, y: -16, scale: 0.96, filter: "blur(8px)" },
+    animate: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+    exit: { opacity: 0, y: -8, scale: 0.97, filter: "blur(4px)" },
+    transition: { type: "spring", stiffness: 460, damping: 34 },
   },
   drawer: {
-    initial: { x: "100%" },
-    animate: { x: 0 },
-    exit: { x: "100%" },
-    transition: { type: "spring", stiffness: 380, damping: 40 },
+    initial: { x: "100%", opacity: 0.6 },
+    animate: { x: 0, opacity: 1 },
+    exit: { x: "100%", opacity: 0.6 },
+    transition: { type: "spring", stiffness: 340, damping: 36 },
   },
 };
 
 const PANEL_CLASS: Record<"dialog" | "drawer", string> = {
   dialog:
-    "relative mx-4 mt-[12vh] w-full max-w-xl rounded-2xl border border-line-strong shadow-lift",
+    "relative mx-4 mt-[12vh] w-full max-w-xl rounded-2xl border border-line-strong shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8),0_0_60px_-20px_var(--color-brand-glow)]",
   drawer:
-    "absolute inset-y-0 right-0 flex w-full max-w-lg flex-col border-l border-line-strong shadow-lift",
+    "absolute inset-y-0 right-0 flex w-full max-w-lg flex-col border-l border-line-strong shadow-[-30px_0_80px_-30px_rgb(0_0_0/0.8),-10px_0_60px_-30px_var(--color-brand-glow)]",
 };
 
 interface OverlayProps {
@@ -168,7 +168,7 @@ function OverlayPanel({
     >
       <motion.div
         aria-hidden
-        className="absolute inset-0 bg-canvas/60 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-canvas/65 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -183,6 +183,15 @@ function OverlayPanel({
         className={cn("glass outline-none", PANEL_CLASS[variant])}
         {...PANEL_MOTION[variant]}
       >
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute from-transparent via-accent/70 to-transparent",
+            variant === "dialog"
+              ? "inset-x-8 top-0 h-px bg-linear-to-r"
+              : "inset-y-10 left-0 w-px bg-linear-to-b",
+          )}
+        />
         {children}
       </motion.div>
     </div>

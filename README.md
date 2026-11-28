@@ -69,7 +69,7 @@ Integration and e2e tests need MongoDB running. First Playwright run on a new ma
 
 | Action                     | Mouse / trackpad    | Touch                 | Keyboard                                                          |
 | -------------------------- | ------------------- | --------------------- | ----------------------------------------------------------------- |
-| New task                   | **New task** button | Neon **+** button     | `N`                                                               |
+| New task                   | **New task** button | Round **+** button    | `N`                                                               |
 | Search tasks, switch views | **Search** button   | Search icon           | `⌘K` / `Ctrl+K`                                                   |
 | Open a task                | Click the card      | Tap the card          | `Tab` to the card, `Enter`                                        |
 | Move or reorder a task     | Drag the card       | Long-press, then drag | `Space` to lift, arrows to move, `Space` to drop, `Esc` to cancel |
@@ -79,7 +79,8 @@ In quick add, `#label` adds a label and `!low` / `!med` / `!high` / `!urgent` se
 
 - **Filters** (above the board): All / This week / This month, plus priority and label chips. "This week" means planned for this week _or_ due this week; "This month" includes everything in this week. Overdue tasks always show. Filters are remembered on each device.
 - **Done** shows the last 7 days; older completed tasks fold into a toggle at the bottom of the column.
-- **Overdue** cards get a pulsing neon edge, and the count appears next to the Board title, on the Board nav item and, when the app is installed, on its Dock icon. Tasks due within 24 hours show their date in neon.
+- **Overdue** cards get a pulsing rose edge, and the count appears next to the Board title, on the Board nav item and, when the app is installed, on its Dock icon. Tasks due within 24 hours show their date in amber.
+- **Notifications** (the bell, top of the sidebar or mobile top bar): overdue tasks, tasks due within 24 hours, tasks in progress for 7+ days, and tasks finished in the last 24 hours. They are worked out on the device from your tasks. The red count shows what arrived since you last opened the panel; opening it clears the count, and items stay highlighted until you open them or **Mark all as read**. Seen/read state is kept per device and cleared on sign-out.
 
 ## How data flows
 
@@ -91,7 +92,9 @@ In quick add, `#label` adds a label and `!low` / `!med` / `!high` / `!urgent` se
 
 ## Design tokens
 
-The whole palette lives in one place: the `@theme` block in [`src/app/globals.css`](src/app/globals.css). Three hues only (black canvas, purple brand, neon accent), text in white at fixed opacities. `tests/unit/tokens.test.ts` fails if a change breaks WCAG AA contrast or drifts from the values the manifest and icons use (`src/lib/theme.ts`).
+The whole palette ("Aurora") lives in one place: the `@theme` block in [`src/app/globals.css`](src/app/globals.css). An ink-indigo canvas, violet brand and fuchsia accent (primary actions use the violet → fuchsia `bg-cta` gradient), plus one colour per meaning: cyan for info and focus, emerald for done, amber for due soon, rose for overdue. Text is white at fixed opacities. `tests/unit/tokens.test.ts` fails if a change breaks WCAG AA contrast or drifts from the values the manifest and icons use (`src/lib/theme.ts`).
+
+Motion respects the system's reduced-motion setting: CSS animations collapse to their end state and Motion skips transform animations.
 
 ## Install on macOS
 
