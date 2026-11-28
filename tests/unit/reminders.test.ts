@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   affectsReminders,
+  MAX_REMINDERS,
   type OffsetReminder,
   type ReminderPolicy,
   type ReminderRule,
   scheduledReminders,
+  toggleOffset,
 } from "@/lib/domain/reminders";
 import { applyTaskPatch, createTask, markTaskDeleted, type Task } from "@/lib/domain/task";
 
@@ -163,5 +165,23 @@ describe("affectsReminders", () => {
       false,
     );
     expect(affectsReminders(due, applyTaskPatch(due, { status: "in_progress" }, now))).toBe(false);
+  });
+});
+
+describe("toggleOffset", () => {
+  const hour = offset(1, "hours");
+
+  it("adds a missing offset and removes a present one", () => {
+    const id = crypto.randomUUID();
+    expect(toggleOffset([hour], { amount: 1, unit: "days" }, id)).toEqual([
+      hour,
+      { id, kind: "offset", amount: 1, unit: "days" },
+    ]);
+    expect(toggleOffset([hour], { amount: 1, unit: "hours" }, id)).toEqual([]);
+  });
+
+  it("adds nothing to a full list", () => {
+    const full = Array.from({ length: MAX_REMINDERS }, (_, index) => offset(index + 1, "minutes"));
+    expect(toggleOffset(full, { amount: 1, unit: "weeks" }, crypto.randomUUID())).toEqual(full);
   });
 });

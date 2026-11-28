@@ -154,6 +154,22 @@ export function isStillScheduled(
   );
 }
 
+/**
+ * Removes the rule with this offset, or adds one (with `id`) when there is none and the list
+ * has room. Works for a task's rules and for the default ones alike.
+ */
+export function toggleOffset<Rule extends ReminderRule>(
+  rules: readonly Rule[],
+  offset: Pick<OffsetReminder, "amount" | "unit">,
+  id: string,
+): (Rule | OffsetReminder)[] {
+  const matches = (rule: ReminderRule) =>
+    rule.kind === "offset" && rule.amount === offset.amount && rule.unit === offset.unit;
+  if (rules.some(matches)) return rules.filter((rule) => !matches(rule));
+  if (rules.length >= MAX_REMINDERS) return [...rules];
+  return [...rules, { id, kind: "offset", ...offset }];
+}
+
 /** True when a change from `previous` to `next` can move, add or remove reminder times. */
 export function affectsReminders(previous: Task | null, next: Task): boolean {
   if (previous === null) return true;
