@@ -15,7 +15,7 @@ export function EmptyState({
         />
         <div className="animate-float">{illustration}</div>
       </div>
-      <h2 className="text-2xl font-semibold text-fg">{title}</h2>
+      <h2 className="text-3xl text-fg">{title}</h2>
       <p className="mt-2 text-sm text-fg-secondary">{body}</p>
       {action && <div className="mt-6">{action}</div>}
     </div>

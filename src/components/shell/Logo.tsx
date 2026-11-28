@@ -30,7 +30,7 @@ export function Logo({ className }: Readonly<{ className?: string }>) {
           />
         </svg>
       </span>
-      <span className="font-display text-xl font-semibold tracking-tight">Pulse</span>
+      <span className="font-display text-2xl tracking-wide">Pulse</span>
     </span>
   );
 }

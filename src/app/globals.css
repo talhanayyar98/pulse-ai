@@ -199,7 +199,7 @@
 /* next/font exposes these variables on <html>; inline so utilities resolve them at use site. */
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-display: var(--font-bebas-neue), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
 }
 
@@ -335,7 +335,8 @@
     & :where(h1, h2, h3, h4) {
       margin: 1rem 0 0.5rem;
       font-family: var(--font-display);
-      font-weight: 600;
+      font-weight: 400;
+      letter-spacing: 0.03em;
       color: var(--color-fg);
     }
     & h1 {
@@ -413,12 +414,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Fraunces (with its optical-size axis) for headings and titles; Inter for everything else. */
+  /* Bebas Neue for headings; Inter for everything else, task titles included (they are user text,
+     and an all-caps face would hide their casing). It has one weight, so never let the browser fake bold. */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    font-synthesis: none;
   }
 
   * {

@@ -161,7 +161,7 @@ function TaskDetails({
           className="mt-8 animate-fade-up [animation-delay:120ms]"
           aria-labelledby="subtasks-heading"
         >
-          <h3 id="subtasks-heading" className="mb-2 text-sm font-semibold">
+          <h3 id="subtasks-heading" className="mb-2 text-lg leading-none">
             Subtasks
           </h3>
           <SubtaskList subtasks={task.subtasks} onChange={(subtasks) => update({ subtasks })} />

@@ -64,7 +64,7 @@ export function TaskCard({
         <PriorityIcon priority={task.priority} className="mt-0.5" />
         <span
           className={cn(
-            "font-display text-[15px] leading-snug font-medium",
+            "text-[15px] leading-snug font-medium",
             done && "text-fg-secondary line-through decoration-success/60",
           )}
         >

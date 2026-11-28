@@ -46,7 +46,7 @@ export function BoardColumn({
           )}
           <span className={cn("relative size-2 rounded-full", tone.dot)} />
         </span>
-        <h2 className="text-base font-semibold text-fg">{label}</h2>
+        <h2 className="text-xl leading-none text-fg">{label}</h2>
         {/* Re-keyed so the count pops whenever it changes. */}
         <motion.span
           key={count}
